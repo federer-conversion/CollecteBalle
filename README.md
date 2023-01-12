@@ -31,7 +31,7 @@ Hugo Yverneau
 
 ### Gestion de projet
 
-https://tree.taiga.io/project/d_snlt_work_account-federer-reconversions/admin/project-profile/details
+https://tree.taiga.io/project/d_snlt_work_account-federer-reconversions/
 
 ## Structure du dépôt
 
