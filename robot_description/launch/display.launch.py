@@ -3,10 +3,7 @@ from launch.substitutions import Command, LaunchConfiguration
 import launch_ros
 import os
 
-from launch.actions import IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration
-from launch.substitutions import ThisLaunchFileDir
 import os
 
 
@@ -29,10 +26,6 @@ def generate_launch_description():
         condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
     )
     
-    tennis_court_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [ThisLaunchFileDir(), '/tennis_court.launch.py']),
-    )
     spawn_entity = launch_ros.actions.Node(
     	package='gazebo_ros', 
     	executable='spawn_entity.py',
@@ -63,7 +56,6 @@ def generate_launch_description():
                                              description='Absolute path to robot urdf file'),
         launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='True',
                                              description='Flag to enable use_sim_time'),
-        tennis_court_launch,
 
         joint_state_publisher_node,
         robot_state_publisher_node,

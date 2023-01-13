@@ -53,7 +53,7 @@ source install/setup.bash # ifyour workspace is not sourced and if your are in t
 
 The launch the code :
 ```bash
-ros2 launch robot_description display.launch.py
+ros2 launch robot_description simulation.launch.py
 ```
 
 In another terminal, run in the root of your ROS2 workspace:
@@ -66,10 +66,24 @@ ros2 run process_camera_pkg process_camera_img --ros-args -p display_mode:=False
 
 <ins>Note:</ins> Set the display_mode value ('True' or 'False') depending of if you want to see the camera image and the where the balls are detected on this image
 
-
-
 Now enjoy the tennis court with the robot.
 
+
+### launch if `ros2 launch robot_description simulation.launch.py` is not working : 
+In a first terminal, run in the root of your ROS2 workspace:
+```bash
+source /opt/ros/foxy/setup.bash
+source install/setup.bash
+ros2 launch robot_description display.launch.py
+```
+
+In a second terminal, run in the root of your ROS2 workspace:
+```bash
+source /opt/ros/foxy/setup.bash
+source install/setup.bash
+ros2 launch tennis_court tennis_court.launch.py
+```
+<details>
 ## Groupe
 
 ### Membres
