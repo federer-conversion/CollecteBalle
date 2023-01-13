@@ -47,7 +47,6 @@ class Subscriber_publisher : public rclcpp::Node
 
     void timer_callback()
     {   
-        print("ok")
         // declaration des variables
         double e;
         double delta_theta;
@@ -64,7 +63,6 @@ class Subscriber_publisher : public rclcpp::Node
         //publication du message
         msg.linear.x = -8;
         commande_pub->publish(msg);
-        commande_pub->publish(message);
         }
 
     rclcpp::TimerBase::SharedPtr timer_; 
