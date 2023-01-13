@@ -23,6 +23,14 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+add_executable(control_simple src/control_simple.cpp)
+ament_target_dependencies(control_simple rclcpp std_msgs geometry_msgs)
+target_link_libraries(control_simple "${cpp_typesupport_target}")
+target_include_directories(control_simple PUBLIC
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+$<INSTALL_INTERFACE:include>)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -38,9 +46,11 @@ endif()
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
-install(PROGRAMS
-  src/bug2.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+#install(PROGRAMS
+  #src/bug2.py
+  #DESTINATION lib/${PROJECT_NAME}
+#)
+install(TARGETS control_simple 
+DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

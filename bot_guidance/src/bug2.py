@@ -25,7 +25,7 @@ from rclpy.qos import qos_profile_sensor_data
 import numpy as np 
  
 
-class PlaceholderController(Node):
+class motionPlanner(Node):
     """
     Create a Placeholder Controller class, which is a subclass of the Node 
     class for ROS2.
@@ -37,7 +37,7 @@ class PlaceholderController(Node):
         """
         ####### INITIALIZE ROS PUBLISHERS AND SUBSCRIBERS##############
         # Initiate the Node class's constructor and give it a name
-        super().__init__('PlaceholderController')
+        super().__init__('motionPlanner')
          
         # Create a subscriber
         # This node subscribes to messages of type Float64MultiArray  
@@ -59,7 +59,7 @@ class PlaceholderController(Node):
         # sensor_msgs/LaserScan     
         self.scan_subscriber = self.create_subscription(
             LaserScan,
-            '/en613/scan',
+            '/scan',
             self.scan_callback,
             qos_profile=qos_profile_sensor_data)
              
@@ -72,7 +72,7 @@ class PlaceholderController(Node):
         # The maximum number of queued messages is 10.
         self.subscription_goal_pose = self.create_subscription(
             Pose,
-            '/en613/goal',
+            '/goal',
             self.pose_received,
             10)
              
@@ -84,7 +84,7 @@ class PlaceholderController(Node):
         # /end613/cmd_vel topic and execute the motion accordingly.
         self.publisher_ = self.create_publisher(
             Twist, 
-            '/en613/cmd_vel', 
+            '/demo/cmd_vel', 
             10)
          
         # Initialize the LaserScan sensor readings to some large value
@@ -628,7 +628,7 @@ def main(args=None):
     rclpy.init(args=args)
      
     # Create the node
-    controller = PlaceholderController()
+    controller = motionPlanner()
  
     # Spin the node so the callback function is called
     # Pull messages from any topics this node is subscribed to
