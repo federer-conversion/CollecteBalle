@@ -44,17 +44,15 @@ source install/setup.bash
 
 ### Launch
 
-In a first terminal, in the root of your ROS2 workspace run :
+In a terminal :
+Be sure you have already sourced, if not :
 ```bash
-source /opt/ros/foxy/setup.bash
-source install/setup.bash
-ros2 launch tennis_court tennis_court.launch.py
+source /opt/ros/foxy/setup.bash # if your foxy is not sourced
+source install/setup.bash # ifyour workspace is not sourced and if your are in the root of your worksapce
 ```
 
-In another terminal run, in the root of your ROS2 workspace:
+The launch the code :
 ```bash
-source /opt/ros/foxy/setup.bash
-source install/setup.bash
 ros2 launch robot_description display.launch.py
 ```
 
@@ -68,10 +66,7 @@ ros2 run process_camera_pkg process_camera_img --ros-args -p display_mode:=False
 
 <ins>Note:</ins> Set the display_mode value ('True' or 'False') depending of if you want to see the camera image and the where the balls are detected on this image
 
-In another terminal run, in the root of your ROS2 workspace:
-```bash
-ros2 run rqt_robot_steering rqt_robot_steering --force-discover
-```
+
 
 Now enjoy the tennis court with the robot.
 

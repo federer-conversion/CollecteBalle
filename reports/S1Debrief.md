@@ -28,7 +28,8 @@ Pourcentage de tâches réalisées: 100 % : les besoins ont été défini volont
     - peut-être dans une boite
 - Attention à la sécurité 
     - pas d'angle dangereux
-
+- vitesse
+    - le robot doit aller "assez vite"
 ### Ce qui a fonctionné
 
 Implémentation du robot de nav2 sur le court 
