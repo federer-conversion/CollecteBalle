@@ -14,6 +14,14 @@
 
   <xacro:property name="caster_xoff" value="0.14"/>
 
+  <material name="corps">
+    <color rgba="0.3 1. 0.3 1.0"/>
+  </material>
+
+    <material name="reste">
+    <color rgba="1. 0.3 0.3 1.0"/>
+  </material>
+
   <!-- Define some commonly used intertial properties  -->
   <xacro:macro name="box_inertia" params="m w h d">
     <inertial>
@@ -39,6 +47,16 @@
   </xacro:macro>
   
   <!-- Robot Base -->
+  <gazebo reference="base_link">
+    <visual>  
+    <material>  
+      <ambient>0.3 1. 0.3 1.0</ambient>  
+      <diffuse>0.3 1. 0.3 1.0</diffuse>  
+      <specular>0.3 1. 0.3 1.0</specular>  
+      <emissive>0.3 1. 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
   <link name="base_link">
     <visual>
       <geometry>
@@ -69,7 +87,62 @@
     <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
   </joint>
 
+  <!--contrepoids-->
+  <gazebo reference="battery">
+    <visual>  
+    <material>  
+      <ambient>0.3 1. 0.3 1.0</ambient>  
+      <diffuse>0.3 1. 0.3 1.0</diffuse>  
+      <specular>0.3 1. 0.3 1.0</specular>  
+      <emissive>0.3 1. 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="battery">
+      <visual>
+      <geometry>
+        <box size="0.1 0.2 0.1"/>
+      </geometry>
+      <material name="Cyan">
+        <color rgba="0 1.0 1.0 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.1 0.2 0.1"/>
+      </geometry>
+    </collision>
+  	<xacro:box_inertia m="5" w="0.1" d="0.2" h="0.1"/>
+  </link>
+
+  <joint name="battery_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="battery"/>
+    <origin xyz="-0.25 0. 0." rpy="0 0 0"/>
+  </joint>
+
   <!-- Wheels -->
+  <gazebo reference="drivewhl_l_link">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <gazebo reference="drivewhl_r_link">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
   <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
     <link name="${prefix}_link">
       <visual>
@@ -103,6 +176,22 @@
   <xacro:wheel prefix="drivewhl_l" x_reflect="-1" y_reflect="1" />
   <xacro:wheel prefix="drivewhl_r" x_reflect="-1" y_reflect="-1" />
 
+  <gazebo reference="front_caster">
+    <mu1>0</mu1>
+    <mu2>0</mu2>
+    <kp>500000.0</kp>
+    <kd>10.0</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
+    <visual>  
+    <material>  
+      <ambient>0. 0. 0.0 1.0</ambient>  
+      <diffuse>0. 0. 0.0 1.0</diffuse>  
+      <specular>0. 0. 0.0 1.0</specular>  
+      <emissive>0. 0. 0.0 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
   <link name="front_caster">
     <visual>
       <geometry>
@@ -130,14 +219,13 @@
   </joint>
 
   <!-- Attrapeur -->
-
   <gazebo reference="segment_central">
     <visual>  
     <material>  
-      <ambient>0.30 0.15 0.0 1.0</ambient>  
-      <diffuse>0.30 0.15 0.0 1.0</diffuse>  
-      <specular>0.30 0.15 0.0 1.0</specular>  
-      <emissive>0.30 0.15 0.0 1.0</emissive>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
     </material>  
     </visual> 
   </gazebo>
@@ -145,7 +233,7 @@
   <link name="segment_central">
     <visual>
       <geometry>
-        <box size="0.3 0.05 0.2"/>
+        <box size="0.7 0.05 0.2"/>
       </geometry>
       <material name="Brown">
         <color rgba="0.30 0.15 0.0 1.0"/>
@@ -154,11 +242,11 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>0 0.0 0.0 1.0
-        <box size="0.3 0.05 0.2"/>
+        <box size="0.7 0.05 0.2"/>
       </geometry>
     </collision>
 
-    <xacro:box_inertia m="0.1" w="0.3" d="0.05" h="0.2"/>
+    <xacro:box_inertia m="0.1" w="0.7" d="0.05" h="0.2"/>
   </link>
 
   <joint name="segment_central_joint" type="fixed">
@@ -167,7 +255,17 @@
     <origin xyz="0.25 0.0 0" rpy="0 0 ${0.5 * pi}"/>
   </joint>
 
-    <link name="segment_d1">
+  <gazebo reference="segment_d1">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_d1">
     <visual>
       <geometry>
         <box size="0.3 0.05 0.2"/>
@@ -189,10 +287,20 @@
   <joint name="segment_d1_joint" type="fixed">
     <parent link="segment_central"/>
     <child link="segment_d1"/>
-    <origin xyz="-0.30 -0.07 0" rpy="0 0 ${0.16* pi}"/>
+    <origin xyz="-0.25 -0.32 0" rpy="0 0 ${0.16* pi}"/>
   </joint>
 
-      <link name="segment_d2">
+<gazebo reference="segment_d2">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_d2">
     <visual>
       <geometry>
         <box size="0.3 0.05 0.2"/>
@@ -217,8 +325,52 @@
     <origin xyz="-0.30 -0.07 0" rpy="0 0 ${0.16* pi}"/>
   </joint>
 
+  <gazebo reference="segment_d3">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_d3">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+      <material name="Brown">
+        <color rgba="0.30 0.15 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>0 0.0 0.0 1.0
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+    </collision>
 
-    <link name="segment_g1">
+    <xacro:box_inertia m="0.1" w="0.3" d="0.05" h="0.2"/>
+  </link>
+
+  <joint name="segment_d3_joint" type="fixed">
+    <parent link="segment_d2"/>
+    <child link="segment_d3"/>
+    <origin xyz="-0.15 -0.1 0" rpy="0 0 ${-0.32* pi}"/>
+  </joint>
+
+  <gazebo reference="segment_g1">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_g1">
     <visual>
       <geometry>
         <box size="0.3 0.05 0.2"/>
@@ -240,10 +392,20 @@
   <joint name="segment_g1_joint" type="fixed">
     <parent link="segment_central"/>
     <child link="segment_g1"/>
-    <origin xyz="0.30 -0.07 0" rpy="0 0 ${-0.16* pi}"/>
+    <origin xyz="0.25 -0.32 0" rpy="0 0 ${-0.16* pi}"/>
   </joint>
 
-      <link name="segment_g2">
+  <gazebo reference="segment_g2">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_g2">
     <visual>
       <geometry>
         <box size="0.3 0.05 0.2"/>
@@ -267,6 +429,113 @@
     <child link="segment_g2"/>
     <origin xyz="0.30 -0.07 0" rpy="0 0 ${-0.16* pi}"/>
   </joint>
+
+  <gazebo reference="segment_g3">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_g3">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+      <material name="Brown">
+        <color rgba="0.30 0.15 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>0 0.0 0.0 1.0
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="0.1" w="0.3" d="0.05" h="0.2"/>
+  </link>
+
+  <joint name="segment_g3_joint" type="fixed">
+    <parent link="segment_g2"/>
+    <child link="segment_g3"/>
+    <origin xyz="0.15 -0.1 0" rpy="0 0 ${0.32* pi}"/>
+  </joint>
+
+  <gazebo reference="segment_triangled">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_triangled">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+      <material name="Brown">
+        <color rgba="0.30 0.15 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>0 0.0 0.0 1.0
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="0.1" w="0.3" d="0.05" h="0.2"/>
+  </link>
+
+  <joint name="segment_triangled_joint" type="fixed">
+    <parent link="segment_central"/>
+    <child link="segment_triangled"/>
+    <origin xyz="-0.25 -0.12 0" rpy="0 0 ${-0.25* pi}"/>
+  </joint>
+
+  <gazebo reference="segment_triangleg">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+  <link name="segment_triangleg">
+    <visual>
+      <geometry>
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+      <material name="Brown">
+        <color rgba="0.30 0.15 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>0 0.0 0.0 1.0
+        <box size="0.3 0.05 0.2"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="0.1" w="0.3" d="0.05" h="0.2"/>
+  </link>
+
+  <joint name="segment_triangleg_joint" type="fixed">
+    <parent link="segment_central"/>
+    <child link="segment_triangleg"/>
+    <origin xyz="0.25 -0.12 0" rpy="0 0 ${0.25* pi}"/>
+  </joint>
+
+
 
   <link name="imu_link">
     <visual>
@@ -387,150 +656,5 @@
     </plugin>
   </gazebo>
 
- <link name="lidar_link">
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0.125"/>
-      <inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
-    </inertial>
-
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-         <cylinder radius="0.0508" length="0.055"/>
-      </geometry>
-    </collision>
-
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-         <cylinder radius="0.0508" length="0.055"/>
-      </geometry>
-    </visual>
-  </link>
-    
-  <joint name="lidar_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="lidar_link"/>
-    <origin xyz="0 0 0.12" rpy="0 0 0"/>
-  </joint>
-    
-  <gazebo reference="lidar_link">
-    <sensor name="lidar" type="ray">
-      <always_on>true</always_on>
-      <visualize>true</visualize>
-      <update_rate>5</update_rate>
-      <ray>
-        <scan>
-          <horizontal>
-            <samples>360</samples>
-            <resolution>1.000000</resolution>
-            <min_angle>0.000000</min_angle>
-            <max_angle>6.280000</max_angle>
-          </horizontal>
-        </scan>
-        <range>
-          <min>0.120000</min>
-          <max>3.5</max>
-          <resolution>0.015000</resolution>
-        </range>
-        <noise>
-          <type>gaussian</type>
-          <mean>0.0</mean>
-          <stddev>0.01</stddev>
-        </noise>
-      </ray>
-      <plugin name="scan" filename="libgazebo_ros_ray_sensor.so">
-        <ros>
-          <remapping>~/out:=scan</remapping>
-        </ros>
-        <output_type>sensor_msgs/LaserScan</output_type>
-        <frame_name>lidar_link</frame_name>
-      </plugin>
-    </sensor>
-  </gazebo>
-  
-  <link name="camera_link">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.015 0.130 0.022"/>
-      </geometry>
-    </visual>
-
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.015 0.130 0.022"/>
-      </geometry>
-    </collision>
-
-    <inertial>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <mass value="0.035"/>
-      <inertia ixx="0.001"  ixy="0"  ixz="0" iyy="0.001" iyz="0" izz="0.001" />
-    </inertial>
-  </link>
-  
-  <joint name="camera_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="camera_link"/>
-    <origin xyz="0.215 0 0.05" rpy="0 0 0"/>
-  </joint>
-
-  <link name="camera_depth_frame"/>
-
-  <joint name="camera_depth_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-    <parent link="camera_link"/>
-    <child link="camera_depth_frame"/>
-  </joint>
-
-  <gazebo reference="camera_link">
-    <sensor name="depth_camera" type="depth">
-      <visualize>true</visualize>
-      <update_rate>30.0</update_rate>
-      <camera name="camera">
-        <horizontal_fov>1.047198</horizontal_fov>
-        <image>
-          <width>640</width>
-          <height>480</height>
-          <format>R8G8B8</format>
-        </image>
-        <clip>
-          <near>0.05</near>
-          <far>3</far>
-        </clip>
-      </camera>
-      <plugin name="depth_camera_controller" filename="libgazebo_ros_camera.so">
-        <baseline>0.2</baseline>
-        <alwaysOn>true</alwaysOn>
-        <updateRate>0.0</updateRate>
-        <frame_name>camera_depth_frame</frame_name>
-        <pointCloudCutoff>0.5</pointCloudCutoff>
-        <pointCloudCutoffMax>3.0</pointCloudCutoffMax>
-        <distortionK1>0</distortionK1>
-        <distortionK2>0</distortionK2>
-        <distortionK3>0</distortionK3>
-        <distortionT1>0</distortionT1>
-        <distortionT2>0</distortionT2>
-        <CxPrime>0</CxPrime>
-        <Cx>0</Cx>
-        <Cy>0</Cy>
-        <focalLength>0</focalLength>
-        <hackBaseline>0</hackBaseline>
-      </plugin>
-    </sensor>
-  </gazebo>
-  
-  <gazebo reference="front_caster">
-  <mu1>0</mu1>
-  <mu2>0</mu2>
-  <kp>500000.0</kp>
-  <kd>10.0</kd>
-  <minDepth>0.001</minDepth>
-  <maxVel>0.1</maxVel>
-  <material>Gazebo/FlatBlack</material>
-  </gazebo>	
   
 </robot>

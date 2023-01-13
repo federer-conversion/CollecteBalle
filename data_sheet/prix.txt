@@ -1,0 +1,5 @@
+corps : 100€
+batterie moteur : 60€ (2S 20Ah)
+batterie elec : 20€ (2S 2Ah)
+ordi embarqué : 120 € (RPi 4B 4Go)
+pince : 50€ natif
