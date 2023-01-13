@@ -37,10 +37,10 @@ class ImageParser(Node):
         self.safezone_positions = []
         
         # Create variable to parse HSV frame
-        self.ball_low_HSV = (25,0,0)
-        self.ball_high_HSV = (35,255,255)
-        self.safezone_low_HSV = (10,0,0)
-        self.safezone_high_HSV = (20,255,255)
+        self.ball_low_HSV = (29,0,0)
+        self.ball_high_HSV = (31,255,255)
+        self.safezone_low_HSV = (13,0,0)
+        self.safezone_high_HSV = (16,255,255)
 
     def get_image_callback(self, img_msg):
         # Note: get encoding but for our case its rbg8

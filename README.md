@@ -66,6 +66,14 @@ ros2 run process_camera_pkg process_camera_img --ros-args -p display_mode:=False
 
 <ins>Note:</ins> Set the display_mode value ('True' or 'False') depending of if you want to see the camera image and the where the balls are detected on this image
 
+In another terminal, run in the root of your ROS2 workspace:
+
+```bash
+source /opt/ros/foxy/setup.bash
+source install/setup.bash
+ros2 run guidage_pkg guidage
+```
+
 Now enjoy the tennis court with the robot.
 
 
