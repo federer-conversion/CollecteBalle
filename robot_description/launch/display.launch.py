@@ -32,6 +32,7 @@ def generate_launch_description():
         arguments=['-entity', 'sam_bot', '-topic', 'robot_description','-x','1','-y','1'],
         output='screen'
     )
+
     robot_localization_node = launch_ros.actions.Node(
         package='robot_localization',
         executable='ekf_node',
