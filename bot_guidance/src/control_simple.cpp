@@ -14,7 +14,6 @@ using namespace std;
 double yaw = 0; //cap a suivre
 vector<double> X = {0,0,0}; // position robot
 vector<double> Y = {0,0,0}; // position cible
-bool possession=false;
 
 class Subscriber_publisher : public rclcpp::Node
 {
@@ -47,51 +46,28 @@ class Subscriber_publisher : public rclcpp::Node
     }
 
     void timer_callback()
-    {
-          //declaration des variables
-    double e;
-    double delta_theta;
-    double theta_voulu;
-    geometry_msgs::msg::Twist msg;
-    double k = 8;
+    {   
+        print("ok")
+        // declaration des variables
+        double e;
+        double delta_theta;
+        double theta_voulu;
+        geometry_msgs::msg::Twist msg;
+        double k = 8;
 
-    while(true){
-        ros::spinOnce(); //verification des fonctions d'interruption
-
-        //calcul de la commande en angle
-        if (possession==false){
         theta_voulu = atan2(Y[1]-X[1], Y[0]-X[0]);
-        }
-        else {
-        theta_voulu = atan2(-0.05-X[1], -11.-X[0]);
-        double dist =pow(pow(0.05-X[1],2)+ pow(11.-X[0],2),0.5);
-        ROS_INFO("dist [%f]", dist);
-        if ( dist<3.){ 
-            msg_pavard.data=true;
-            tireur.publish(msg_pavard);
-        }
-
-        }
-        ROS_INFO("voulu [%f]", theta_voulu);
+        
         delta_theta = theta_voulu-yaw;
         e = 2*atan(tan(delta_theta/2));
-        ROS_INFO("e [%f]", e);
-        // ROS_INFO("x1 [%f]", Y[0]);
-        // ROS_INFO("x2 [%f]", Y[1]);
         msg.angular.z = -k*e;
-        ROS_INFO("cap [%f]", yaw);
 
         //publication du message
         msg.linear.x = -8;
-        commande_pub.publish(msg);
-
-        loop_rate.sleep();
-    }
-        auto message = geometry_msgs::msg::Twist();
-        message.data = sin(this->now().seconds());
+        commande_pub->publish(msg);
         commande_pub->publish(message);
-    }
+        }
 
+    rclcpp::TimerBase::SharedPtr timer_; 
     rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr subscriptionBotPose_;
     rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr subscriptionGoalPose_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr commande_pub;
