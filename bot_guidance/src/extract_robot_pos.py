@@ -31,6 +31,7 @@ class BotPose(Node):
 
 
     def listener_callback(self, msg):
+        print("ok")
         print(msg.name)
         global message
         name = msg.name
