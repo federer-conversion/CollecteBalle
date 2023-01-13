@@ -24,6 +24,7 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(gazebo_msgs REQUIRED)
 
 add_executable(control_simple src/control_simple.cpp)
 ament_target_dependencies(control_simple rclcpp std_msgs geometry_msgs)
@@ -50,6 +51,12 @@ ament_python_install_package(${PROJECT_NAME})
   #src/bug2.py
   #DESTINATION lib/${PROJECT_NAME}
 #)
+
+install(PROGRAMS
+  src/extract_robot_pos.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 install(TARGETS control_simple 
 DESTINATION lib/${PROJECT_NAME})
 
