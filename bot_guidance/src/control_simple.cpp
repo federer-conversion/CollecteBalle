@@ -24,7 +24,7 @@ class Subscriber_publisher : public rclcpp::Node
     Subscriber_publisher()
     : Node("subscriber_publisher")
     {
-      commande_pub = this->create_publisher<geometry_msgs::msg::Twist>("/commande_robot", 1000);
+      commande_pub = this->create_publisher<geometry_msgs::msg::Twist>("/demo/cmd_vel", 1000);
       timer_ = this->create_wall_timer(500ms, std::bind(&Subscriber_publisher::timer_callback, this));
       subscriptionBotPose_ = this->create_subscription<geometry_msgs::msg::Pose>("/position_robot", 1000, bind(&Subscriber_publisher::PositionCallBack, this, placeholders::_1));
       subscriptionGoalPose_ = this->create_subscription<geometry_msgs::msg::Pose>("/position_balle", 1000, bind(&Subscriber_publisher::PositionCibleCallBack, this, placeholders::_1));
@@ -38,8 +38,7 @@ class Subscriber_publisher : public rclcpp::Node
     X[1] = message->position.y;
     X[2] = 0.;
     yaw = tf2::getYaw(message->orientation);
-    cout << "X = (" << X[0] << ", " << X[1] << ", " << X[2] << endl;
-    cout << "message->position.x" << message->position.x << endl;
+    cout << yaw << endl;
     }
 
     void PositionCibleCallBack(const geometry_msgs::msg::Pose::SharedPtr message){
@@ -69,9 +68,7 @@ class Subscriber_publisher : public rclcpp::Node
         double k_linear = 1;
         dx = X[0] - Y[0];
         dy = X[1] - Y[1];
-        cout << "dx" << dx << endl;
         double distance = sqrt( dx*dx + dy*dy);
-        cout << distance << endl;
         msg.linear.x = k_linear*distance;
         commande_pub->publish(msg);
         }
