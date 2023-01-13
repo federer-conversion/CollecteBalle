@@ -27,7 +27,7 @@ class Subscriber_publisher : public rclcpp::Node
       commande_pub = this->create_publisher<geometry_msgs::msg::Twist>("/commande_robot", 1000);
       timer_ = this->create_wall_timer(500ms, std::bind(&Subscriber_publisher::timer_callback, this));
       subscriptionBotPose_ = this->create_subscription<geometry_msgs::msg::Pose>("/position_robot", 1000, bind(&Subscriber_publisher::PositionCallBack, this, placeholders::_1));
-      subscriptionGoalPose_ = this->create_subscription<geometry_msgs::msg::Pose>("/position_r_balle", 1000, bind(&Subscriber_publisher::PositionCibleCallBack, this, placeholders::_1));
+      subscriptionGoalPose_ = this->create_subscription<geometry_msgs::msg::Pose>("/position_balle", 1000, bind(&Subscriber_publisher::PositionCibleCallBack, this, placeholders::_1));
     }
 
   private:
