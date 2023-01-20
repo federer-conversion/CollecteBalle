@@ -15,7 +15,7 @@ class Balle():
         self.age+=1
 
     def __str__(self):
-        return "balle en {0}, présente depuis {1}".format(self.pose,self.age)
+        return "balle en {0}, présente depuis {1} frames".format(self.pose,self.age)
 
     def __eq__(self,balle):
-        return (((balle.get_pose()[0]*1.0-self.pose[0]*1.0)**2+(balle.get_pose()[1]*1.0-self.pose[1]*1.0)**2)**0.5)<5
+        return (((balle.get_pose()[0]*1.0-self.pose[0]*1.0)**2+(balle.get_pose()[1]*1.0-self.pose[1]*1.0)**2)**0.5)<14

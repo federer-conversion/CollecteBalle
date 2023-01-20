@@ -21,9 +21,15 @@ def generate_launch_description():
             package='process_camera_pkg',
             executable='process_camera_img',
             name='process_camera_img')
+    
+    guidage_node = launch_ros.actions.Node(
+            package='guidage_pkg',
+            executable='guidage',
+            name='guidage')
      
     return launch.LaunchDescription([
         display_launch,
         tennis_court_launch,
         camera_node,
+        guidage_node
     ])
