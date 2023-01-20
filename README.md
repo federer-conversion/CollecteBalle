@@ -30,6 +30,14 @@ pip install cv2
 pip install evdev
 ```
 
+Install ros2_control :
+
+```bash
+sudo apt-get install ros-foxy-controller-manager
+sudo apt-get install ros-foxy-gazebo-ros2-control
+sudo apt-get install ros-foxy-ros2-control
+```
+
 ### Clone the repository
 
 In the `src/` directory of your ROS2 workspace clone the git repository :
@@ -79,6 +87,13 @@ source install/setup.bash
 ros2 run process_camera_pkg process_camera_img --ros-args -p display_mode:=True
 ```
 
+If you want to actuate grasper to retract use this command :
+```bash
+ros2 topic pub /velocity_controller/commands std_msgs/msg/Float64MultiArray "data:
+- <value>"
+# Change value for example 0.1 in rad/s
+```
+
 If you want to the the output of the guidance, in another terminal run in the root of your ROS2 workspace:
 
 ```bash
@@ -102,6 +117,9 @@ source install/setup.bash
 ros2 launch tennis_court tennis_court.launch.py
 ```
 <details>
+
+
+
 ## Groupe
 
 ### Membres

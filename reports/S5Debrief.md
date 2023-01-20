@@ -11,7 +11,7 @@ Pourcentage de tâches réalisées:
 
 - Guidage complet
 - Fonction de coût à peaufiner (ajuster les coefs + guidage en absence de balle)
-- Commande de la pince ok mais à améliorer (mettre en place un service + )
+- Commande de la pince ok mais à améliorer (mettre en place un service + pb avec les bibliotheques)
 - Detection/Localisation de la pince et du robot
 - Publication de la position et de l'orientation
 
