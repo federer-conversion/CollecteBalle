@@ -161,16 +161,17 @@ class ImageParser(Node):
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
         for c in cnts:
             x,y,w,h = cv2.boundingRect(c)
-            if(w>20 and h>20):
-                self.pince_position.append(x+(w/2))
-                self.pince_position.append(y+(h/2))
-                if self.debug_mode:
-                    cv2.rectangle(self.image, (x, y), (x + w, y + h), (255,0,0), 2)
+            # if(w>20 and h>20):
+            self.pince_position.append(x+(w/2))
+            self.pince_position.append(y+(h/2))
+            if self.debug_mode:
+                cv2.rectangle(self.image, (x, y), (x + w, y + h), (255,0,0), 2)
 
         # robot heading
-        self.robot_position[0] = (self.robot_position[0] + self.pince_position[0])/2
-        self.robot_position[1] = (self.robot_position[1] + self.pince_position[1])/2
-        orientation = math.atan2(self.robot_position[1]-self.pince_position[1], self.pince_position[0]-self.robot_position[0])
+        if(len(self.robot_position) >0 and len(self.pince_position)>1):
+            self.robot_position[0] = (self.robot_position[0] + self.pince_position[0])/2
+            self.robot_position[1] = (self.robot_position[1] + self.pince_position[1])/2
+            orientation = math.atan2(self.robot_position[1]-self.pince_position[1], self.pince_position[0]-self.robot_position[0])
 
         # Publish the balls positions
         ball_positions_msg = UInt16MultiArray()
@@ -184,7 +185,7 @@ class ImageParser(Node):
 
         # Publish the robot position
         robot_position_msg = PoseStamped()
-        if(len(self.robot_position)>0):
+        if(len(self.robot_position)>0 and len(self.pince_position)>1):
             robot_position_msg.pose.position.x = self.robot_position[0]
             robot_position_msg.pose.position.y = self.robot_position[1]
             robot_position_msg.pose.orientation = ros_quaternion_from_euler(0.0, 0.0, orientation)
