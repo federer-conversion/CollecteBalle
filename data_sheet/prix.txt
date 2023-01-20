@@ -1,5 +1,20 @@
-corps : 100€
-batterie moteur : 60€ (2S 20Ah)
-batterie elec : 20€ (2S 2Ah)
-ordi embarqué : 120 € (RPi 4B 4Go)
-pince : 50€ natif
+Cout de production Unitaire: 620€
+	Corps : 100€
+	Batteries: 100€
+	ordi embarqué : 120 € (RPi 4B 4Go)
+	pince : 100€ natif
+	Production: 200€
+
+Cout nette après taxe et marge (environ +50%): 1000€
+
+Devellopement et Recherche: 23000€
+	5 Ingénieurs x 10 sprints x 4 heures x 100€ (cout de l'heure brute) = 20000€
+	construction de 3 modules pour les tests: 3000€
+
+Divers (déplacement, café, matériels, ...): 1000€ 
+
+Total Dévellopement : 24000€
+Robot Unitaire: 1000€
+
+Prix du robot par lot de 100: 900€
+

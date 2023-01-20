@@ -62,8 +62,15 @@ class ImageParser(Node):
         image_HSV = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
         # Get binary image with balls isolated
         image_ball = cv2.inRange(image_HSV, self.ball_low_HSV, self.ball_high_HSV)
+        # Use opening morphology to avoid false detection
+        kernel = np.ones((3, 3), np.uint8)
+        image_ball = cv2.morphologyEx(image_ball, cv2.MORPH_OPEN, kernel)
+
         # Get binary image with safe zones isolated
         image_safezone = cv2.inRange(image_HSV, self.safezone_low_HSV, self.safezone_high_HSV)
+        # Use opening morphology to avoid false detection
+        kernel = np.ones((3, 3), np.uint8)
+        image_safezone = cv2.morphologyEx(image_safezone, cv2.MORPH_OPEN, kernel)
 
         # Classified and localized balls
         cnts = cv2.findContours(image_ball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
