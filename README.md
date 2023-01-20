@@ -57,14 +57,6 @@ The launch the code :
 ros2 launch robot_description simulation.launch.py
 ```
 
-In another terminal, run in the root of your ROS2 workspace:
-
-```bash
-source /opt/ros/foxy/setup.bash
-source install/setup.bash
-ros2 run guidage_pkg guidage
-```
-
 In another terminal, if you want to control the robot with a controller, run in the root of your ROS2 workspace:
 
 ```bash
@@ -75,6 +67,21 @@ ros2 run remote_controller_pkg remote_control_robot
 
 Now enjoy the tennis court with the robot.
 
+If you want to the the output of the image processing, in another terminal run in the root of your ROS2 workspace:
+
+```bash
+source /opt/ros/foxy/setup.bash
+source install/setup.bash
+ros2 run process_camera_pkg process_camera_img --ros-args -p display_mode:=True
+```
+
+If you want to the the output of the guidance, in another terminal run in the root of your ROS2 workspace:
+
+```bash
+source /opt/ros/foxy/setup.bash
+source install/setup.bash
+ros2 run guidage_pkg guidage --ros-args -p display_mode:=True
+```
 
 ### launch if `ros2 launch robot_description simulation.launch.py` is not working : 
 In a first terminal, run in the root of your ROS2 workspace:
