@@ -79,7 +79,10 @@ class Guidage(Node):
                 print(self.balles_pres[i])
         self.balles_pres=balle_nouv
         self.balles_pres=nettoyer(self.balles_pres)
-        print(len(self.balles_pres))
+        print("en tout",len(self.balles_pres),"balles")
+
+
+
         self.publish_target()
 
     def sub_safezones_callback(self, array_msg):
