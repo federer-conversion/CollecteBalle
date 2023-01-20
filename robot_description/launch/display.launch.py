@@ -55,15 +55,12 @@ def generate_launch_description():
 
     # Pour le contrôle
     load_joint_state_controller = ExecuteProcess(
-        # cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
-        #      'joint_state_broadcaster'],
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
              'joint_state_broadcaster'],
         output='screen'
     )
 
     load_joint_trajectory_controller = ExecuteProcess(
-        # cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'velocity_controller'],
         cmd=['ros2', 'control', 'load_controller', '--set-state', 'start', 'velocity_controller'],
         output='screen'
     )
@@ -100,22 +97,10 @@ def generate_launch_description():
             )
         ),
 
-        # joint_state_publisher_node,
-        # robot_state_publisher_node,
-        # spawn_entity,
-
-        
-
-        # robot_localization_node,
-        # rqt_robot_steering_node, 
-
         joint_state_publisher_node,
         robot_state_publisher_node,
         spawn_entity,
         robot_localization_node,
         rqt_robot_steering_node,
         
-     
-
-        # joint_state_publisher_node
     ])
