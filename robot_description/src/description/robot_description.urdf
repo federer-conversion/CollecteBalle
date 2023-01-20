@@ -218,6 +218,7 @@
     <origin xyz="${caster_xoff} 0.0 ${-(base_height/2)}" rpy="0 0 0"/>
   </joint>
 
+
   <!-- Attrapeur -->
   <gazebo reference="segment_central">
     <visual>  
@@ -657,4 +658,64 @@
   </gazebo>
 
   
+   <!-- Ma pivot -->
+
+  <gazebo reference="my_pivot">
+    <visual>  
+    <material>  
+      <ambient>1. 0.3 0.3 1.0</ambient>  
+      <diffuse>1. 0.3 0.3 1.0</diffuse>  
+      <specular>1. 0.3 0.3 1.0</specular>  
+      <emissive>1. 0.3 0.3 1.0</emissive>  
+    </material>  
+    </visual> 
+  </gazebo>
+
+  <link name="my_pivot">
+    <visual>
+      <geometry>
+        <box size="0.7 0.05 0.2"/>
+      </geometry>
+      <material name="Brown">
+        <color rgba="0.30 0.15 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>0 0.0 0.0 1.0
+        <box size="0.7 0.05 0.2"/>
+      </geometry>
+    </collision>
+
+    <xacro:box_inertia m="0.1" w="0.7" d="0.05" h="0.2"/>
+  </link>
+
+  <joint name="my_pivot_joint" type="revolute">
+    <axis xyz="1 0 0"/>
+    <origin xyz="1 0.0 0" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="my_pivot"/>
+    <limit effort="1000.0" lower="0" upper="0.38" velocity="10"/>
+  </joint>
+
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="my_pivot_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <parameters>$(find gazebo_ros2_control_demos)/config/gripper_controller.yaml</parameters>
+    </plugin>
+  </gazebo>
+
 </robot>
