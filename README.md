@@ -86,28 +86,6 @@ source /opt/ros/foxy/setup.bash
 source install/setup.bash
 ros2 run guidage_pkg guidage --ros-args -p display_mode:=True
 ```
-Note: if you want to use the debug mode of the camera processing algorithm
-```bash
-source /opt/ros/foxy/setup.bash
-source install/setup.bash
-ros2 run process_camera_pkg process_camera_img --ros-args -p display_mode:=True
-```
-
-If you want to the the output of the image processing, in another terminal run in the root of your ROS2 workspace:
-
-```bash
-source /opt/ros/foxy/setup.bash
-source install/setup.bash
-ros2 run process_camera_pkg process_camera_img --ros-args -p display_mode:=True
-```
-
-If you want to the the output of the guidance, in another terminal run in the root of your ROS2 workspace:
-
-```bash
-source /opt/ros/foxy/setup.bash
-source install/setup.bash
-ros2 run guidage_pkg guidage --ros-args -p display_mode:=True
-```
 
 ### launch if `ros2 launch robot_description simulation.launch.py` is not working : 
 In a first terminal, run in the root of your ROS2 workspace:
