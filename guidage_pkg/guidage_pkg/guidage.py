@@ -27,7 +27,7 @@ def cost_fnct(pos_robot,zone,balle,K_d=1,K_a=4,K_z=1):
     cost_dist=((balle_pose[0]*1.0-pos_robot[0])**2+(balle_pose[1]*1.0-pos_robot[1])**2)**0.5
     cost_age= balle.age
     cost_zone=((pos_robot[0]*1.0-zone[0])**2+(balle_pose[1]*1.0-zone[1])**2)**0.5
-    total_cos=K_d*cost_dist-K_a*cost_age + K_z*cost_zone
+    total_cos=K_d*cost_dist+K_a*cost_age + K_z*cost_zone
     return max(total_cos/100.,0.)
 
 class Guidage(Node):
