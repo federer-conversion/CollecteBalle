@@ -10,8 +10,8 @@ Pourcentage de tâches réalisées:
 ### Ce qui a fonctionné
 
 - Guidage complet
-- Fonction de coût à peaufiner (ajuster les coefs)
-- Commande de la pince ok mais à améliorer
+- Fonction de coût à peaufiner (ajuster les coefs + guidage en absence de balle)
+- Commande de la pince ok mais à améliorer (mettre en place un service + )
 
 ### Ce qui n'a pas fonctionné
 
@@ -19,12 +19,12 @@ Pourcentage de tâches réalisées:
 
 ### Retour d'expérience du PO
 
-
+- Le client conseille de faire un système qui stocke les balles dans une zone fermée (non visible de puis la caméra)
 
 ### Conseils pour le prochain PO
 
-- Modifier la pince car perte de balles si coincé contre le mur
-- Gros problème d'inertie du robot pour le controle avec manette et quand la pince bouge => voir avec mirado
+- Modifier la pince car perte de balles si coincé contre le mur (retour client)
+- Gros problème d'inertie du robot pour le controle avec manette et quand la pince bouge => voir avec Mirado
 
 ## Mesures à garder
 
