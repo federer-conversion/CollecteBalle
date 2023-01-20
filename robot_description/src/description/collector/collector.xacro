@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot name="collector"
+    xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+    <xacro:include filename="$(find robot_description)/src/description/collector/segment.xacro" />
+
+    <xacro:macro name="collector">
+        <xacro:segment name="segment_central" x="0.7" y="0.05" z="0.2" joint_parent="base_link" joint_origin_xyz="0.25 0.0 0" joint_origin_rpy="0 0 ${0.5 * pi}"/>
+
+        <xacro:segment name="segment_d1" x="0.3" y="0.05" z="0.2" joint_parent="segment_central" joint_origin_xyz="-.25 -.32 0" joint_origin_rpy="0 0 ${0.16 * pi}"/>
+
+        <xacro:segment name="segment_d2" x="0.3" y="0.05" z="0.2" joint_parent="segment_d1" joint_origin_xyz="-0.30 -0.07 0" joint_origin_rpy="0 0 ${0.16 * pi}"/>
+
+        <xacro:segment name="segment_d3" x="0.3" y="0.05" z="0.2" joint_parent="segment_d2" joint_origin_xyz="-0.15 -0.1 0" joint_origin_rpy="0 0 ${-0.32* pi}"/>
+
+        <xacro:segment name="segment_g1" x="0.3" y="0.05" z="0.2" joint_parent="segment_central" joint_origin_xyz="0.25 -0.32 0" joint_origin_rpy="0 0 ${-0.16* pi}"/>
+
+        <xacro:segment name="segment_g2" x="0.3" y="0.05" z="0.2" joint_parent="segment_g1" joint_origin_xyz="0.30 -0.07 0" joint_origin_rpy="0 0 ${-0.16* pi}"/>
+
+        <xacro:segment name="segment_g3" x="0.3" y="0.05" z="0.2" joint_parent="segment_g2" joint_origin_xyz="0.15 -0.1 0" joint_origin_rpy="0 0 ${0.32* pi}"/>
+
+
+
+
+
+        <xacro:segment name="segment_triangled" x="0.3" y="0.05" z="0.2"  joint_parent="segment_central" joint_origin_xyz="-0.25 -0.12 0" joint_origin_rpy="0 0 ${-0.25* pi}"/>
+
+        <xacro:segment name="segment_triangleg" x="0.3" y="0.05" z="0.2"  joint_parent="segment_central" joint_origin_xyz="0.25 -0.12 0" joint_origin_rpy="0 0 ${0.25* pi}"/>
+
+
+    </xacro:macro>
+
+</robot>
