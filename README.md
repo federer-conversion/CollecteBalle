@@ -35,6 +35,7 @@ Install ros2_control :
 ```bash
 sudo apt-get install ros-foxy-controller-manager
 sudo apt-get install ros-foxy-gazebo-ros2-control
+sudo apt-get install ros-foxy-ros2-control
 ```
 
 ### Clone the repository
