@@ -3,7 +3,7 @@
     xmlns:xacro="http://ros.org/wiki/xacro">
 
 
-    <xacro:include filename="$(find robot_description)/src/description/collector/segment.xacro" />
+    <xacro:include filename="$(find robot_description)/src/description/robot_parts/collector/segment.xacro" />
 
     <xacro:macro name="collector">
         <xacro:segment name="segment_central" x="0.7" y="0.05" z="0.2" joint_parent="base_link" joint_origin_xyz="0.25 0.0 0" joint_origin_rpy="0 0 ${0.5 * pi}"/>
