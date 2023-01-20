@@ -93,8 +93,10 @@ class Guidage(Node):
         self.balles_pres=nettoyer(self.balles_pres)
         if self.debug_mode:
             print("en tout",len(self.balles_pres),"balles")
-        ind_min,val_min=-1,-1.
+        ind_min,val_min=-1,1000000000
         for ind,balle_pres in enumerate (self.balles_pres):
+            if self.debug_mode:
+                print(balle_pres.age)
             if balle_pres.age>10:
                 cost=min(cost_fnct((100,100),self.safezones_positions_matrix[0],balle_pres),cost_fnct((100,100),self.safezones_positions_matrix[1],balle_pres))
                 if self.debug_mode:
@@ -111,14 +113,18 @@ class Guidage(Node):
 
 
     def publish_target(self,ind_min):
-        try:
+        if ind_min==-1:
+            pose_msg = Pose()
+            pose_msg.position.x = 0.
+            pose_msg.position.y = 0.
+            self.target_publisher.publish(pose_msg)
+        else:
             balle_pose= self.balles_pres[ind_min].get_pose()
             pose_msg = Pose()
             pose_msg.position.x = float(balle_pose[0])
             pose_msg.position.y = float(balle_pose[1])
             self.target_publisher.publish(pose_msg)
-        except:
-            pass
+
 
 
 
