@@ -9,11 +9,11 @@
 
     
 
-    <gazebo>
+    <!-- <gazebo>
         <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
         <parameters>$(find gazebo_ros2_control_demos)/config/gripper_controller.yaml</parameters>
         </plugin>
-    </gazebo>
+    </gazebo> -->
 
     <xacro:macro name="collector">
         <!-- <xacro:segment name="segment_central" x="0.7" y="0.05" z="0.2" joint_parent="base_link" joint_origin_xyz="0.25 0.0 0" joint_origin_rpy="0 0 ${0.5 * pi}"/> -->
@@ -54,27 +54,56 @@
             <origin xyz="0.25 0.0 0" rpy="0 0 ${0.5 * pi}"/>
         </joint> -->
 
-        <joint name="segment_central_joint" type="revolute">
+        <!-- <joint name="segment_central_joint" type="revolute">
             <axis xyz="0 1 0"/>
             <origin xyz="0.25 0.0 0" rpy="-1.5 0 ${-0.5 * pi}"/>
             <parent link="base_link"/>
             <child link="segment_central"/>
             <limit effort="10000.0" lower="0" upper="0.1" velocity="0"/>
-        </joint> 
+        </joint>  -->
+
+        <joint name="segment_central_joint" type="revolute">
+            <axis xyz="1 0 0"/>
+            <origin xyz="0.25 0.0 0" rpy="-1.5 0 ${-0.5 * pi}"/>
+            <parent link="base_link"/>
+            <child link="segment_central"/>
+            <limit effort="1000.0" lower="-0.15" upper="0.15" velocity="30"/>
+            <!-- <dynamics damping="0.0" friction="0.0"/> -->
+        </joint>
+
+
 
         <ros2_control name="GazeboSystem" type="system">
-                <hardware>
-                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
-                </hardware>
-                <joint name="segment_central_joint">
-                <command_interface name="position"/>
-                <state_interface name="position">
-                    <param name="initial_value">0.0</param>
-                </state_interface>
+            <hardware>
+            <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+            <!-- <joint name="segment_central_joint">
+            <command_interface name="position"/>
+            <state_interface name="position">
+                <param name="initial_value">0.0</param>
+            </state_interface>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+            </joint> -->
+
+            <joint name="segment_central_joint">
+                <command_interface name="velocity">
+                    <param name="min">-0.10</param>
+                    <param name="max">0.10</param>
+                </command_interface>
+                <state_interface name="position"/>
                 <state_interface name="velocity"/>
                 <state_interface name="effort"/>
-                </joint>
-            </ros2_control>
+            </joint>
+        </ros2_control>
+
+        <gazebo>
+            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+            <parameters>/home/mirado/ws_CollecteBalle/src/CollecteBalle/config/gripper_controller.yaml</parameters>
+            <!-- <parameters>$(find CollecteBalle)/config/gripper_controller.yaml</parameters> -->
+            
+            </plugin>
+        </gazebo>
 
         <xacro:segment name="segment_d1" x="0.3" y="0.05" z="0.2" joint_parent="segment_central" joint_origin_xyz="-.25 -.32 0" joint_origin_rpy="0 0 ${0.16 * pi}"/>
 
