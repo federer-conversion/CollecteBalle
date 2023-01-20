@@ -95,11 +95,12 @@ class Guidage(Node):
             print("en tout",len(self.balles_pres),"balles")
         ind_min,val_min=-1,-1.
         for ind,balle_pres in enumerate (self.balles_pres):
-            cost=min(cost_fnct((100,100),self.safezones_positions_matrix[0],balle_pres),cost_fnct((100,100),self.safezones_positions_matrix[1],balle_pres))
-            if self.debug_mode:
-                print(cost)
-            if cost<val_min:
-                val_min,ind_min=cost,ind
+            if balle_pres.age>10:
+                cost=min(cost_fnct((100,100),self.safezones_positions_matrix[0],balle_pres),cost_fnct((100,100),self.safezones_positions_matrix[1],balle_pres))
+                if self.debug_mode:
+                    print(cost)
+                if cost<val_min:
+                    val_min,ind_min=cost,ind
 
 
         self.publish_target(ind_min)
