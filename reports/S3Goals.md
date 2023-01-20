@@ -1,4 +1,4 @@
-# Objectifs du 13/01/2023 (Matin)
+# Objectifs du 13/01/2023 (Après-midi)
 
 PO: Maël Godard
 

@@ -10,8 +10,9 @@ import os
 def generate_launch_description():
     pkg_share = launch_ros.substitutions.FindPackageShare(
         package='robot_description').find('robot_description')
+        
     default_model_path = os.path.join(
-        pkg_share, 'src/description/robot_description.urdf')
+        pkg_share, 'src/description/robot_description.xacro')
 
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
