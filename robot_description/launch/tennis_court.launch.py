@@ -25,7 +25,8 @@ def generate_launch_description():
     gazebo_ros_share = get_package_share_directory("gazebo_ros")
 
     # Gazebo Server
-    gzserver_launch_file = os.path.join(gazebo_ros_share, "launch", "gzserver.launch.py")
+    gzserver_launch_file = os.path.join(
+        gazebo_ros_share, "launch", "gzserver.launch.py")
     world_file = os.path.join(pkg_share, "worlds", "court.world")
     gzserver_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gzserver_launch_file),
@@ -37,7 +38,8 @@ def generate_launch_description():
     )
 
     # Gazebo Client
-    gzclient_launch_file = os.path.join(gazebo_ros_share, "launch", "gzclient.launch.py")
+    gzclient_launch_file = os.path.join(
+        gazebo_ros_share, "launch", "gzclient.launch.py")
     gzclient_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gzclient_launch_file),
         condition=IfCondition(LaunchConfiguration("gui"))
@@ -45,7 +47,8 @@ def generate_launch_description():
 
     static_tf_node = Node(
         package="tf2_ros",
-        arguments=["0", "0", "8", "3.14159", "1.57079", "3.14159", "map", "zenith_camera_link"],
+        arguments=["0", "0", "8", "3.14159", "1.57079",
+                   "3.14159", "map", "zenith_camera_link"],
         **{executable: "static_transform_publisher"}
     )
 

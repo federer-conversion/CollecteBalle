@@ -9,10 +9,11 @@ import os
 from launch.actions import ExecuteProcess, RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 
+
 def generate_launch_description():
     pkg_share = launch_ros.substitutions.FindPackageShare(
         package='robot_description').find('robot_description')
-        
+
     default_model_path = os.path.join(
         pkg_share, 'src/description/robot_description.xacro')
 
@@ -29,11 +30,12 @@ def generate_launch_description():
         name='joint_state_publisher',
         condition=launch.conditions.UnlessCondition(LaunchConfiguration('gui'))
     )
-    
+
     spawn_entity = launch_ros.actions.Node(
-    	package='gazebo_ros', 
-    	executable='spawn_entity.py',
-        arguments=['-entity', 'sam_bot', '-topic', 'robot_description','-x','1','-y','1'],
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=['-entity', 'sam_bot', '-topic',
+                   'robot_description', '-x', '1', '-y', '1'],
         output='screen'
     )
 
@@ -62,7 +64,8 @@ def generate_launch_description():
     )
 
     load_joint_trajectory_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start', 'velocity_controller'],
+        cmd=['ros2', 'control', 'load_controller',
+             '--set-state', 'start', 'velocity_controller'],
         output='screen'
     )
 
@@ -78,7 +81,7 @@ def generate_launch_description():
                                              description='Absolute path to robot urdf file'),
         launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='True',
                                              description='Flag to enable use_sim_time'),
-        
+
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=spawn_entity,
@@ -103,5 +106,5 @@ def generate_launch_description():
         spawn_entity,
         robot_localization_node,
         rqt_robot_steering_node,
-        
+
     ])

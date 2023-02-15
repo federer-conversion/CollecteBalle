@@ -12,13 +12,13 @@
   <xacro:include filename="$(find robot_description)/src/description/robot_parts/caster_wheel.xacro" />
   <xacro:include filename="$(find robot_description)/src/description/robot_parts/control.xacro" />
 
-  <xacro:base/>
-  <xacro:battery/>
-  <xacro:wheels/>
-  <xacro:caster_wheel/>
+  <xacro:base />
+  <xacro:battery />
+  <xacro:wheels />
+  <xacro:caster_wheel />
 
-  <xacro:collector/>
-  <xacro:control/>
+  <xacro:collector />
+  <xacro:control />
 
 
 </robot>
