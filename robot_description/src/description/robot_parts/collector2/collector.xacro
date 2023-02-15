@@ -41,12 +41,12 @@
         </link>
 
         <joint name="segment_central_joint" type="revolute">
-            <axis xyz="1 0 0"/>
+            <axis xyz="0 1 0"/>
             <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
             <origin xyz="-0.5 -0.23 0" rpy="${0 * pi} ${0 * pi} ${0 * pi}"/>
             <parent link="base_link"/>
             <child link="segment_central"/>
-            <limit effort="1000.0" lower="-0.15" upper="0.15" velocity="30"/>
+            <limit effort="1000.0" lower="${-1 * pi}" upper="${1 * pi}" velocity="30"/>
             <!-- <dynamics damping="0.0" friction="0.0"/> -->
         </joint>
 
