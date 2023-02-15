@@ -3,49 +3,51 @@
     xmlns:xacro="http://ros.org/wiki/xacro">
 
 
-
     <!-- Define robot constants -->
-    <xacro:property name="base_width" value="0.31"/>
-    <xacro:property name="base_length" value="0.42"/>
-    <xacro:property name="base_height" value="0.18"/>
+    <xacro:property name="base_width" value="0.31" />
+    <xacro:property name="base_length" value="0.42" />
+    <xacro:property name="base_height" value="0.18" />
 
-    <xacro:property name="wheel_radius" value="0.10"/>
-    <xacro:property name="wheel_width" value="0.04"/>
-    <xacro:property name="wheel_ygap" value="0.025"/>
-    <xacro:property name="wheel_zoff" value="0.05"/>
-    <xacro:property name="wheel_xoff" value="0.12"/>
+    <xacro:property name="wheel_radius" value="0.10" />
+    <xacro:property name="wheel_width" value="0.04" />
+    <xacro:property name="wheel_ygap" value="0.025" />
+    <xacro:property name="wheel_zoff" value="0.05" />
+    <xacro:property name="wheel_xoff" value="0.12" />
 
-    <xacro:property name="caster_xoff" value="0.14"/>
+    <xacro:property name="caster_xoff" value="0.14" />
 
     <material name="corps">
-        <color rgba="0.3 1. 0.3 1.0"/>
+        <color rgba="0.3 1. 0.3 1.0" />
     </material>
 
     <material name="reste">
-        <color rgba="1. 0.3 0.3 1.0"/>
+        <color rgba="1. 0.3 0.3 1.0" />
     </material>
 
     <!-- Define some commonly used intertial properties  -->
     <xacro:macro name="box_inertia" params="m w h d">
         <inertial>
-            <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
-            <mass value="${m}"/>
-            <inertia ixx="${(m/12) * (h*h + d*d)}" ixy="0.0" ixz="0.0" iyy="${(m/12) * (w*w + d*d)}" iyz="0.0" izz="${(m/12) * (w*w + h*h)}"/>
+            <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}" />
+            <mass value="${m}" />
+            <inertia ixx="${(m/12) * (h*h + d*d)}" ixy="0.0" ixz="0.0" iyy="${(m/12) * (w*w + d*d)}"
+                iyz="0.0" izz="${(m/12) * (w*w + h*h)}" />
         </inertial>
     </xacro:macro>
 
     <xacro:macro name="cylinder_inertia" params="m r h">
         <inertial>
             <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
-            <mass value="${m}"/>
-            <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy = "0" ixz = "0" iyy="${(m/12) * (3*r*r + h*h)}" iyz = "0" izz="${(m/2) * (r*r)}"/>
+            <mass value="${m}" />
+            <inertia ixx="${(m/12) * (3*r*r + h*h)}" ixy="0" ixz="0" iyy="${(m/12) * (3*r*r + h*h)}"
+                iyz="0" izz="${(m/2) * (r*r)}" />
         </inertial>
     </xacro:macro>
 
     <xacro:macro name="sphere_inertia" params="m r">
         <inertial>
-            <mass value="${m}"/>
-            <inertia ixx="${(2/5) * m * (r*r)}" ixy="0.0" ixz="0.0" iyy="${(2/5) * m * (r*r)}" iyz="0.0" izz="${(2/5) * m * (r*r)}"/>
+            <mass value="${m}" />
+            <inertia ixx="${(2/5) * m * (r*r)}" ixy="0.0" ixz="0.0" iyy="${(2/5) * m * (r*r)}"
+                iyz="0.0" izz="${(2/5) * m * (r*r)}" />
         </inertial>
     </xacro:macro>
 </robot>

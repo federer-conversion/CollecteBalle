@@ -3,7 +3,6 @@
     xmlns:xacro="http://ros.org/wiki/xacro">
 
 
-
     <xacro:macro name="base">
 
         <!-- Robot Base -->
@@ -22,32 +21,34 @@
             <visual>
                 <origin xyz="-0.2 -0.15 0" rpy="${pi/2} 0 0" />
                 <geometry>
-                    <mesh filename="$(find robot_description)/src/description/robot_parts/meshes/chassis_is.dae" scale="0.001 0.001 0.001"/>
+                    <mesh
+                        filename="$(find robot_description)/src/description/robot_parts/meshes/chassis_is.dae"
+                        scale="0.001 0.001 0.001" />
                 </geometry>
                 <material name="Cyan">
-                    <color rgba="0 1.0 1.0 1.0"/>
+                    <color rgba="0 1.0 1.0 1.0" />
                 </material>
             </visual>
 
             <collision>
                 <geometry>
-                    <box size="${base_length} ${base_width} ${base_height}"/>
+                    <box size="${base_length} ${base_width} ${base_height}" />
                 </geometry>
             </collision>
 
-            <xacro:box_inertia m="15" w="${base_width}" d="${base_length}" h="${base_height}"/>
+            <xacro:box_inertia m="15" w="${base_width}" d="${base_length}" h="${base_height}" />
         </link>
 
 
         <!-- Robot Footprint -->
         <link name="base_footprint">
-            <xacro:box_inertia m="0" w="0" d="0" h="0"/>
+            <xacro:box_inertia m="0" w="0" d="0" h="0" />
         </link>
 
         <joint name="base_joint" type="fixed">
-            <parent link="base_link"/>
-            <child link="base_footprint"/>
-            <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
+            <parent link="base_link" />
+            <child link="base_footprint" />
+            <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0" />
         </joint>
 
     </xacro:macro>

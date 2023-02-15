@@ -52,11 +52,6 @@ ament_python_install_package(${PROJECT_NAME})
   #DESTINATION lib/${PROJECT_NAME}
 #)
 
-install(PROGRAMS
-  src/extract_robot_pos.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 install(TARGETS control_simple 
 DESTINATION lib/${PROJECT_NAME})
 
