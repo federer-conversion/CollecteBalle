@@ -33,7 +33,7 @@
                 </geometry>
             </collision> -->
 
-            <xacro:box_inertia m="0.1" w="${x}" d="${y}" h="${z}"/>
+            <xacro:box_inertia m="0.00001" w="${x}" d="${y}" h="${z}"/>
         </link>
 
         <joint name="${name}_joint" type="fixed">

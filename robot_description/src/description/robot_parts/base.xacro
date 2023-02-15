@@ -20,7 +20,8 @@
         </gazebo>
         <link name="base_link">
             <visual>
-                <origin xyz="-0.2 -0.15 0" rpy="${pi/2} 0 0" />
+                <!-- <origin xyz="-0.2 -0.15 0" rpy="${pi/2} 0 0" /> -->
+                <origin xyz="-0.2 -0.15 -0.06" rpy="${pi/2} 0 0" />
                 <geometry>
                     <mesh filename="$(find robot_description)/src/description/robot_parts/meshes/chassis_is.dae" scale="0.001 0.001 0.001"/>
                 </geometry>
