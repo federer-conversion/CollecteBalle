@@ -2,8 +2,9 @@
 <robot name="roballos"
   xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include
-    filename="$(find robot_description)/src/description/robot_parts/collector/collector.xacro" />
+  <!-- <xacro:include filename="$(find robot_description)/src/description/robot_parts/collector/collector.xacro" /> -->
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/collector2/collector.xacro" />
+
   <xacro:include filename="$(find robot_description)/src/description/robot_parts/property.xacro" />
   <xacro:include filename="$(find robot_description)/src/description/robot_parts/base.xacro" />
   <xacro:include filename="$(find robot_description)/src/description/robot_parts/battery.xacro" />
