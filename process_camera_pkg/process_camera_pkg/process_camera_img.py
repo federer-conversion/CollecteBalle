@@ -154,7 +154,6 @@ class ImageParser(Node):
         cnts_int = cv2.findContours(
             image_ball_int, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts_int = cnts_int[0] if len(cnts_int) == 2 else cnts_int[1]
-        print(cnts_int)
         for c in cnts:
             x, y, w, h = cv2.boundingRect(c)
             self.ball_positions.append(int(x+(w/2)))
