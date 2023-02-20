@@ -77,6 +77,14 @@ source install/setup.bash
 ros2 run remote_controller_pkg remote_control_robot
 ```
 
+In another terminal, run in the root of your ROS2 workspace:
+
+```bash
+source /opt/ros/foxy/setup.bash
+source install/setup.bash
+ros2 run bot_control bot_control
+```
+
 Now enjoy the tennis court with the robot.
 
 If you want to the the output of the image processing, in another terminal run in the root of your ROS2 workspace:
