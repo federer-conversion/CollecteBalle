@@ -90,6 +90,8 @@ class ImageParser(Node):
         self.robot_high_HSV = (60.5, 255, 255)
         self.pince_low_HSV = (0, 10, 98)
         self.pince_high_HSV = (1, 255, 255)
+        self.pince_low_HSV_bis = (170, 10, 10)
+        self.pince_high_HSV_bis = (180, 255, 255)
 
     def get_image_callback(self, img_msg):
         # Note: get encoding but for our case its rbg8
@@ -130,8 +132,14 @@ class ImageParser(Node):
         image_robot = cv2.inRange(
             image_HSV, self.robot_low_HSV, self.robot_high_HSV)
         image_pince = cv2.inRange(
-            image_HSV, self.pince_low_HSV, self.pince_high_HSV)
-
+            image_HSV, self.pince_low_HSV, self.pince_high_HSV)+cv2.inRange(
+            image_HSV, self.pince_low_HSV_bis, self.pince_high_HSV_bis)
+        tab_inter=np.argwhere(image_pince>0)
+        minlig,maxlig=np.min(tab_inter[:,0]),np.max(tab_inter[:,0])
+        mincol,maxcol=np.min(tab_inter[:,1]),np.max(tab_inter[:,1])
+        for i in range(minlig,maxlig):
+            for j in range (mincol,maxcol):
+                image_pince[i,j]=1
         # Classified and localized balls
         cnts = cv2.findContours(
             image_ball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
