@@ -14,7 +14,7 @@ PO: Mirado Rajaomarosata
 ## Tâches à réaliser
 
 - Guidage attrape balle
-    + Suivi de point
+    - Publication de commande en fonction des positions
 - Capturer position balle
     - Détection/Classification balle
     - Publisher positions balles
@@ -30,6 +30,12 @@ PO: Mirado Rajaomarosata
 
 - Guidage attrape balle
     - Choix du type de guidage (Bug, Champ de potentiel, A star)
+    
+
+
+
+
+
 
 
 

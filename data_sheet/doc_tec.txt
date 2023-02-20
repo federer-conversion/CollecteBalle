@@ -1,4 +1,4 @@
-poids : 15 kg (corps) + 1kg (0.5 par roue) + 1kg (pince)
+poids : 15 kg (corps) + 1kg (0.5 par roue) + 1kg (pince) (en cours de révision: 10kg + 1kg + 5kg)
 autonomie de 5h , assez pour recharger complètement les batteires : --> roulement possible
 encombrement : ~1m x 1.2m x 0.25m
 vitesse : 3 m/s
