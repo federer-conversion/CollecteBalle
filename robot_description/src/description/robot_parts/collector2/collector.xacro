@@ -159,7 +159,7 @@
         <joint name="pince_d_joint" type="fixed">
             <!-- <axis xyz="0 1 0"/> -->
             <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
-            <origin xyz="-0.4 0.05 0" rpy="${0* pi} ${0* pi} ${(-1/4) * pi}" />
+            <origin xyz="-0.4 0.05 0" rpy="${0* pi} ${0* pi} ${(-1/8) * pi}" />
             <parent link="segment_central" />
             <child link="pince_d" />
             <!-- <dynamics damping="0.0" friction="0.0"/> -->
@@ -203,7 +203,7 @@
         <joint name="pince_g_joint" type="fixed">
             <!-- <axis xyz="0 1 0"/> -->
             <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
-            <origin xyz="-0.4 0.4 0" rpy="${0* pi} ${0* pi} ${(1/4) * pi}" />
+            <origin xyz="-0.4 0.4 0" rpy="${0* pi} ${0* pi} ${(1/8) * pi}" />
             <parent link="segment_central" />
             <child link="pince_g" />
             <!-- <dynamics damping="0.0" friction="0.0"/> -->
