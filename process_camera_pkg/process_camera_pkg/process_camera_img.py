@@ -81,6 +81,8 @@ class ImageParser(Node):
         self.robot_position = []
         self.pince_position = []
 
+        self.ball_in=False
+
         # Create variable to parse HSV frame
         self.ball_low_HSV = (29, 0, 0)
         self.ball_high_HSV = (31, 255, 255)
@@ -162,6 +164,16 @@ class ImageParser(Node):
                 cv2.rectangle(self.image, (x, y),
                               (x + w, y + h), (0, 0, 255), 2)
 
+        if len(cnts_int)>0:
+            self.ball_in=True
+            for c in cnts_int:
+                x, y, w, h = cv2.boundingRect(c)
+                if self.debug_mode:
+                    cv2.rectangle(self.image, (x, y),
+                                (x + w, y + h), (255, 0, 255), 2)
+        else :
+            self.ball_in=False
+
         # Classified and localized safezones
         cnts = cv2.findContours(
             image_safezone, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -186,9 +198,9 @@ class ImageParser(Node):
                 if self.debug_mode:
                     cv2.rectangle(self.image, (x, y),
                                   (x + w, y + h), (255, 0, 0), 2)
-            else:
-                if self.debug_mode:
-                    print("erreur de détection de robot")
+            # else:
+            #     if self.debug_mode:
+            #         print("erreur de détection de robot")
 
         # Classified and localized pince
         cnts = cv2.findContours(
