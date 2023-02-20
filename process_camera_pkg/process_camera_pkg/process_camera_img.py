@@ -81,6 +81,8 @@ class ImageParser(Node):
         self.robot_position = []
         self.pince_position = []
 
+        self.ball_in=False
+
         # Create variable to parse HSV frame
         self.ball_low_HSV = (29, 0, 0)
         self.ball_high_HSV = (31, 255, 255)
@@ -135,15 +137,25 @@ class ImageParser(Node):
             image_HSV, self.pince_low_HSV, self.pince_high_HSV)+cv2.inRange(
             image_HSV, self.pince_low_HSV_bis, self.pince_high_HSV_bis)
         tab_inter=np.argwhere(image_pince>0)
-        minlig,maxlig=np.min(tab_inter[:,0]),np.max(tab_inter[:,0])
-        mincol,maxcol=np.min(tab_inter[:,1]),np.max(tab_inter[:,1])
-        for i in range(minlig,maxlig):
-            for j in range (mincol,maxcol):
-                image_pince[i,j]=1
+        try:
+            minlig,maxlig=np.min(tab_inter[:,0]),np.max(tab_inter[:,0])
+            mincol,maxcol=np.min(tab_inter[:,1]),np.max(tab_inter[:,1])
+            for i in range(minlig,maxlig):
+                for j in range (mincol,maxcol):
+                    image_pince[i,j]=1
+        except Exception as e:
+            print(e)
+        image_ball_int=image_ball.copy()
+        image_ball[image_pince==1]=0
+        image_ball_int[image_pince==0]=0
+        # image_ball[image_pince]=1
         # Classified and localized balls
         cnts = cv2.findContours(
             image_ball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+        cnts_int = cv2.findContours(
+            image_ball_int, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts_int = cnts_int[0] if len(cnts_int) == 2 else cnts_int[1]
         for c in cnts:
             x, y, w, h = cv2.boundingRect(c)
             self.ball_positions.append(int(x+(w/2)))
@@ -151,6 +163,16 @@ class ImageParser(Node):
             if self.debug_mode:
                 cv2.rectangle(self.image, (x, y),
                               (x + w, y + h), (0, 0, 255), 2)
+
+        if len(cnts_int)>0:
+            self.ball_in=True
+            for c in cnts_int:
+                x, y, w, h = cv2.boundingRect(c)
+                if self.debug_mode:
+                    cv2.rectangle(self.image, (x, y),
+                                (x + w, y + h), (255, 0, 255), 2)
+        else :
+            self.ball_in=False
 
         # Classified and localized safezones
         cnts = cv2.findContours(
@@ -176,9 +198,9 @@ class ImageParser(Node):
                 if self.debug_mode:
                     cv2.rectangle(self.image, (x, y),
                                   (x + w, y + h), (255, 0, 0), 2)
-            else:
-                if self.debug_mode:
-                    print("erreur de détection de robot")
+            # else:
+            #     if self.debug_mode:
+            #         print("erreur de détection de robot")
 
         # Classified and localized pince
         cnts = cv2.findContours(
