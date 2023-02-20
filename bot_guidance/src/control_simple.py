@@ -64,7 +64,7 @@ class controlSimple(Node):
         k_linear = 1
 
         theta_voulu = np.arctan2(y_target - y, x_target - x)
-        delta_theta = theta_voulu - yaw
+        delta_theta = -theta_voulu - yaw
         e = 2 * np.arctan(np.tan(delta_theta / 2))
 
         msg.angular.z = k * e
