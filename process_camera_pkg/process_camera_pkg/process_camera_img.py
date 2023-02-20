@@ -140,6 +140,9 @@ class ImageParser(Node):
         for i in range(minlig,maxlig):
             for j in range (mincol,maxcol):
                 image_pince[i,j]=1
+
+        image_ball[image_pince==1]=0
+        # image_ball[image_pince]=1
         # Classified and localized balls
         cnts = cv2.findContours(
             image_ball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
