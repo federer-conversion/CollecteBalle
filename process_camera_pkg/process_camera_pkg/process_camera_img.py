@@ -135,18 +135,26 @@ class ImageParser(Node):
             image_HSV, self.pince_low_HSV, self.pince_high_HSV)+cv2.inRange(
             image_HSV, self.pince_low_HSV_bis, self.pince_high_HSV_bis)
         tab_inter=np.argwhere(image_pince>0)
-        minlig,maxlig=np.min(tab_inter[:,0]),np.max(tab_inter[:,0])
-        mincol,maxcol=np.min(tab_inter[:,1]),np.max(tab_inter[:,1])
-        for i in range(minlig,maxlig):
-            for j in range (mincol,maxcol):
-                image_pince[i,j]=1
-
+        try:
+            minlig,maxlig=np.min(tab_inter[:,0]),np.max(tab_inter[:,0])
+            mincol,maxcol=np.min(tab_inter[:,1]),np.max(tab_inter[:,1])
+            for i in range(minlig,maxlig):
+                for j in range (mincol,maxcol):
+                    image_pince[i,j]=1
+        except Exception as e:
+            print(e)
+        image_ball_int=image_ball.copy()
         image_ball[image_pince==1]=0
+        image_ball_int[image_pince==0]=0
         # image_ball[image_pince]=1
         # Classified and localized balls
         cnts = cv2.findContours(
             image_ball, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+        cnts_int = cv2.findContours(
+            image_ball_int, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts_int = cnts_int[0] if len(cnts_int) == 2 else cnts_int[1]
+        print(cnts_int)
         for c in cnts:
             x, y, w, h = cv2.boundingRect(c)
             self.ball_positions.append(int(x+(w/2)))
