@@ -56,8 +56,8 @@ class controlSimple(Node):
 
         msg2 = Twist()
 
-        k_theta = 1.
-        k_lin = 0.002        
+        k_theta = 1.3
+        k_lin = 0.003        
         b_lin = 0.5
         
         if yaw != None and x_target!=None:
@@ -73,6 +73,7 @@ class controlSimple(Node):
             delta_theta = w - yaw
             u = k_theta*delta_theta
 
+            print(u,u_lin)
             msg2.linear.x = u_lin
             msg2.angular.z = u
 
