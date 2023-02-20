@@ -139,17 +139,17 @@
                 <!-- <origin xyz="-0.15 0 0" rpy="0 0 0"/> -->
                 <geometry>
                     <!-- <box size="0.7 0.05 0.2"/> -->
-                    <box size="0.2 0.01 0.2" />
+                    <box size="0.15 0.01 0.2" />
                 </geometry>
                 <material name="Brown">
                     <color rgba="0.30 0.15 0.0 1.0" />
                 </material>
             </visual>
             <collision>
-                <origin xyz="-0.15 0 0" rpy="0 0 0" />
+                <!-- <origin xyz="-0.15 0 0" rpy="0 0 0" /> -->
                 <geometry>
                     <!-- <box size="0.7 0.05 0.2"/> -->
-                    <box size="0.2 0.01 0.2" />
+                    <box size="0.15 0.01 0.2" />
                 </geometry>
             </collision>
 
@@ -183,17 +183,17 @@
                 <!-- <origin xyz="-0.15 0 0" rpy="0 0 0"/> -->
                 <geometry>
                     <!-- <box size="0.7 0.05 0.2"/> -->
-                    <box size="0.2 0.01 0.2" />
+                    <box size="0.15 0.01 0.2" />
                 </geometry>
                 <material name="Brown">
                     <color rgba="0.30 0.15 0.0 1.0" />
                 </material>
             </visual>
             <collision>
-                <origin xyz="-0.15 0 0" rpy="0 0 0" />
+                <!-- <origin xyz="-0.15 0 0" rpy="0 0 0" /> -->
                 <geometry>
                     <!-- <box size="0.7 0.05 0.2"/> -->
-                    <box size="0.2 0.01 0.2" />
+                    <box size="0.15 0.01 0.2" />
                 </geometry>
             </collision>
 

@@ -40,6 +40,41 @@
             <xacro:box_inertia m="15" w="${base_width}" d="${base_length}" h="${base_height}" />
         </link>
 
+        <!-- <gazebo reference="cap">
+            <visual>
+                <material>
+                    <ambient>1. 0.3 0.3 1.0</ambient>
+                    <diffuse>1. 0.3 0.3 1.0</diffuse>
+                    <specular>1. 0.3 0.3 1.0</specular>
+                    <emissive>1. 0.3 0.3 1.0</emissive>
+                </material>
+            </visual>
+        </gazebo>
+
+        <link name="cap">
+            <visual>
+                <geometry>
+                    <box size="0.4 0.40 0.01" />
+                </geometry>
+                <material name="Brown">
+                    <color rgba="0.35 0.15 0.0 1.0" />
+                </material>
+            </visual>
+            <collision>
+                <geometry>
+                    <box size="0.4 0.40 0.01" />
+                </geometry>
+            </collision>
+
+            <xacro:box_inertia m="0.00001" w="0.7" d="0.05" h="0.2" />
+        </link>
+
+        <joint name="cap_joint" type="fixed">
+            <origin xyz="0.25 0 0.1" rpy="0 0 0" />
+            <parent link="base_link" />
+            <child link="cap" />
+        </joint> -->
+
 
         <!-- Robot Footprint -->
         <link name="base_footprint">
