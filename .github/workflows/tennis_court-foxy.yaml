@@ -2,14 +2,10 @@ name: tennis-court-foxy
 
 on: 
   push:
-    branches: 
-      - main
-      - github-actions
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
-      - github-actions
-      
+    branches: [ main ]
+    
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -18,4 +14,4 @@ jobs:
       - uses: ros-tooling/action-ros-ci@0.2.7
         with:
           target-ros2-distro: foxy
-          package-name: tennis_court
+          package-name: process_camera_pkg

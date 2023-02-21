@@ -104,8 +104,10 @@ class ControlPublisher(Node):
                     if event.type != ecodes.EV_SYN:
                         if int(event.code) == 304 and int(event.value) == 1:
                             self.couple=5.
-                        if int(event.code) == 305 and int(event.value) == 1:
+                        elif int(event.code) == 305 and int(event.value) == 1:
                             self.couple=-5.
+                        else:
+                            self.couple=0.0
                         if int(event.code) == 311 and int(event.value) == 1:
                             self.msg.angular.z = -1*MAX_ANG_VEL
                             self.publisher.publish(self.msg)
@@ -142,6 +144,7 @@ class ControlPublisher(Node):
                             linear_speed_state = 1
                             self.msg.linear.x = MAX_LIN_VEL
                             self.publisher.publish(self.msg)
+
             my_msg.data=[self.couple]
             self.pince_pub.publish(my_msg)
 
