@@ -4,9 +4,43 @@ from rclpy.node import Node
 import numpy as np
 
 from std_msgs.msg import UInt16MultiArray
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, PoseStamped
+from enum import Enum
 
 from .Balle import *
+
+# path_B = np.load('path_B.npy')
+# path_H = np.load('path_H.npy')
+
+class Drone_State(Enum):
+    start = 1
+    change_zone = 1
+    Go_to_ball = 2
+    Go_to_safeZone = 3
+
+def euler_from_quaternion(quaternion):
+    """
+    Converts quaternion (w in last place) to euler roll, pitch, yaw
+    quaternion = [x, y, z, w]
+    Bellow should be replaced when porting for ROS 2 Python tf_conversions is done.
+    """
+    x = quaternion.x
+    y = quaternion.y
+    z = quaternion.z
+    w = quaternion.w
+
+    sinr_cosp = 2 * (w * x + y * z)
+    cosr_cosp = 1 - 2 * (x * x + y * y)
+    roll = np.arctan2(sinr_cosp, cosr_cosp)
+
+    sinp = 2 * (w * y - z * x)
+    pitch = np.arcsin(sinp)
+
+    siny_cosp = 2 * (w * z + x * y)
+    cosy_cosp = 1 - 2 * (y * y + z * z)
+    yaw = np.arctan2(siny_cosp, cosy_cosp)
+
+    return roll, pitch, yaw
 
 
 def nettoyer(tab_de_balles):
@@ -43,6 +77,15 @@ class Guidage(Node):
         self.declare_parameter('display_mode', False)
         self.debug_mode = self.get_parameter(
             'display_mode').get_parameter_value().bool_value
+        
+        # Variable
+        self.x, self.y, self.yaw = None, None, None
+        self.target_ball = None
+        self.robot_state = Drone_State.start
+
+        self.change_zone = True
+        self.capture_ball = False
+        self.in_safezone = False
 
         # Balls position subscriber
         self.subscription_balls = self.create_subscription(
@@ -59,10 +102,22 @@ class Guidage(Node):
         # Save Safe zone position
         self.safezones_positions = np.array([])
 
+        # Robot position subscriber
+        self.subscription_robot_pos = self.create_subscription(
+            PoseStamped, "robot_position", self.robot_position_callback, 10)
+        self.subscription_robot_pos
+
         # Create ball positions publisher
         self.target_publisher = self.create_publisher(Pose, 'target', 10)
+    
+    def robot_position_callback(self, msg):
+        self.x = msg.pose.position.x
+        self.y = msg.pose.position.y
+        quat = msg.pose.orientation
+        roll, pitch, self.yaw = euler_from_quaternion(quat)
 
     def sub_balls_callback(self, array_msg):
+        global target_ball
         balles = np.array(array_msg.data).reshape((-1, 2))
         balle_vue_ce_tour = [False]*len(self.balles_pres)
         for ele in balles:
@@ -111,7 +166,6 @@ class Guidage(Node):
                     print(cost)
                 if cost < val_min:
                     val_min, ind_min = cost, ind
-
         self.publish_target(ind_min)
 
     def sub_safezones_callback(self, array_msg):
@@ -130,6 +184,28 @@ class Guidage(Node):
             pose_msg.position.x = float(balle_pose[0])
             pose_msg.position.y = float(balle_pose[1])
             self.target_publisher.publish(pose_msg)
+
+    def update_state(self):
+        global robot_state
+        if robot_state == Drone_State.start:
+            robot_state = Drone_State.change_zone
+        elif (robot_state == Drone_State.change_zone and not self.change_zone):
+            robot_state = Drone_State.Go_to_ball
+        elif (robot_state == Drone_State.Go_to_ball and self.capture_ball):
+            robot_state = Drone_State.Go_to_safeZone
+        elif (robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
+            robot_state = Drone_State.start
+
+    def state(self):
+        if self.robot_state == Drone_State.start:
+            if self.x < 641 and self.target_ball[0] < 641 or self.x > 641 and self.target_ball[0] > 641:
+                self.change_zone = False
+            elif self.x > 641 and self.target_ball[0] < 641 or self.x > 641 and self.target_ball[0] < 641:
+                self.change_zone = True
+            else:
+                self.change_zone = True
+                print("erreur cas imprévu")
+        
 
 
 def main(args=None):
