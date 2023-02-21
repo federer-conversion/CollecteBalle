@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot name="roballos"
+  xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- <xacro:include filename="$(find robot_description)/src/description/robot_parts/collector/collector.xacro" /> -->
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/collector2/collector.xacro" />
+
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/property.xacro" />
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/base.xacro" />
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/battery.xacro" />
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/wheels.xacro" />
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/caster_wheel.xacro" />
+  <xacro:include filename="$(find robot_description)/src/description/robot_parts/control.xacro" />
+
+  <xacro:base />
+  <xacro:battery />
+  <xacro:wheels />
+  <xacro:caster_wheel />
+
+  <xacro:collector />
+  <xacro:control />
+
+
+</robot>

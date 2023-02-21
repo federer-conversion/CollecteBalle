@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+<robot name="collector"
+    xmlns:xacro="http://ros.org/wiki/xacro">
+
+
+    <xacro:include
+        filename="$(find robot_description)/src/description/robot_parts/collector/segment.xacro" />
+
+
+    <xacro:macro name="collector">
+        <!-- <xacro:segment name="segment_central" x="0.7" y="0.05" z="0.2" joint_parent="base_link"
+        joint_origin_xyz="0.25 0.0 0" joint_origin_rpy="0 0 ${0.5 * pi}"/> -->
+
+        <gazebo reference="segment_central">
+            <visual>
+                <material>
+                    <ambient>1. 0.3 0.3 1.0</ambient>
+                    <diffuse>1. 0.3 0.3 1.0</diffuse>
+                    <specular>1. 0.3 0.3 1.0</specular>
+                    <emissive>1. 0.3 0.3 1.0</emissive>
+                </material>
+            </visual>
+        </gazebo>
+
+        <link name="segment_central">
+            <visual>
+                <origin xyz="-0.2 0 0" rpy="0 0 0" />
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.4 0.01 0.2" />
+                </geometry>
+                <material name="Brown">
+                    <color rgba="0.30 0.15 0.0 1.0" />
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="-0.2 0 0" rpy="0 0 0" />
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.4 0.01 0.2" />
+                </geometry>
+            </collision>
+
+            <xacro:box_inertia m="0.01" w="0.7" d="0.05" h="0.2" />
+        </link>
+
+        <joint name="segment_central_joint" type="revolute">
+            <axis xyz="0 1 0" />
+            <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
+            <origin xyz="0.1 -0.23 0" rpy="${0 * pi} ${(-1/20) * pi} ${0 * pi}" />
+            <parent link="base_link" />
+            <child link="segment_central" />
+            <limit effort="1000000.0" lower="${(1/20) * pi}" upper="${(1+1/20) * pi}" velocity="30" />
+            <dynamics damping="0.0" friction="10.0"/>
+        </joint>
+
+        <ros2_control name="GazeboSystem" type="system">
+            <hardware>
+                <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+            </hardware>
+
+            <joint name="segment_central_joint">
+                <command_interface name="velocity">
+                    <param name="min">-0.10</param>
+                    <param name="max">0.10</param>
+                </command_interface>
+                <state_interface name="position" />
+                <state_interface name="velocity" />
+                <state_interface name="effort" />
+            </joint>
+        </ros2_control>
+
+        <gazebo>
+            <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+                <parameters>$(find robot_description)/config/gripper_controller.yaml</parameters>
+
+            </plugin>
+        </gazebo>
+
+
+        <!--  -->
+        <gazebo reference="segment_g">
+            <visual>
+                <material>
+                    <ambient>1. 0.3 0.3 1.0</ambient>
+                    <diffuse>1. 0.3 0.3 1.0</diffuse>
+                    <specular>1. 0.3 0.3 1.0</specular>
+                    <emissive>1. 0.3 0.3 1.0</emissive>
+                </material>
+            </visual>
+        </gazebo>
+
+        <link name="segment_g">
+            <visual>
+                <!-- <origin xyz="-0.15 0 0" rpy="0 0 0"/> -->
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.3 0.01 0.2" />
+                </geometry>
+                <material name="Brown">
+                    <color rgba="0.30 0.15 0.0 1.0" />
+                </material>
+            </visual>
+            <collision>
+                <origin xyz="-0.15 0 0" rpy="0 0 0" />
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.3 0.01 0.2" />
+                </geometry>
+            </collision>
+
+            <xacro:box_inertia m="0.01" w="0.7" d="0.05" h="0.2" />
+        </link>
+
+        <joint name="segment_g_joint" type="fixed">
+            <!-- <axis xyz="0 1 0"/> -->
+            <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
+            <origin xyz="-0.15 0.46 0" rpy="${0 * pi} ${(0) * pi} ${0 * pi}" />
+            <parent link="segment_central" />
+            <child link="segment_g" />
+            <!-- <dynamics damping="0.0" friction="0.0"/> -->
+        </joint>
+
+
+        <!--  -->
+        <gazebo reference="pince_d">
+            <visual>
+                <material>
+                    <ambient>1. 0.3 0.3 1.0</ambient>
+                    <diffuse>1. 0.3 0.3 1.0</diffuse>
+                    <specular>1. 0.3 0.3 1.0</specular>
+                    <emissive>1. 0.3 0.3 1.0</emissive>
+                </material>
+            </visual>
+        </gazebo>
+
+        <link name="pince_d">
+            <visual>
+                <!-- <origin xyz="-0.15 0 0" rpy="0 0 0"/> -->
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.175 0.01 0.2" />
+                </geometry>
+                <material name="Brown">
+                    <color rgba="0.30 0.15 0.0 1.0" />
+                </material>
+            </visual>
+            <collision>
+                <!-- <origin xyz="-0.15 0 0" rpy="0 0 0" /> -->
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.175 0.01 0.2" />
+                </geometry>
+            </collision>
+
+            <xacro:box_inertia m="0.01" w="0.7" d="0.05" h="0.2" />
+        </link>
+
+        <joint name="pince_d_joint" type="fixed">
+            <!-- <axis xyz="0 1 0"/> -->
+            <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
+            <origin xyz="-0.4 0.05 0" rpy="${0* pi} ${0* pi} ${(-1/5) * pi}" />
+            <parent link="segment_central" />
+            <child link="pince_d" />
+            <!-- <dynamics damping="0.0" friction="0.0"/> -->
+        </joint>
+
+
+        <!--  -->
+        <gazebo reference="pince_g">
+            <visual>
+                <material>
+                    <ambient>1. 0.3 0.3 1.0</ambient>
+                    <diffuse>1. 0.3 0.3 1.0</diffuse>
+                    <specular>1. 0.3 0.3 1.0</specular>
+                    <emissive>1. 0.3 0.3 1.0</emissive>
+                </material>
+            </visual>
+        </gazebo>
+
+        <link name="pince_g">
+            <visual>
+                <!-- <origin xyz="-0.15 0 0" rpy="0 0 0"/> -->
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.175 0.01 0.2" />
+                </geometry>
+                <material name="Brown">
+                    <color rgba="0.30 0.15 0.0 1.0" />
+                </material>
+            </visual>
+            <collision>
+                <!-- <origin xyz="-0.15 0 0" rpy="0 0 0" /> -->
+                <geometry>
+                    <!-- <box size="0.7 0.05 0.2"/> -->
+                    <box size="0.175 0.01 0.2" />
+                </geometry>
+            </collision>
+
+            <xacro:box_inertia m="0.01" w="0.7" d="0.05" h="0.2" />
+        </link>
+
+        <joint name="pince_g_joint" type="fixed">
+            <!-- <axis xyz="0 1 0"/> -->
+            <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
+            <origin xyz="-0.4 0.4 0" rpy="${0* pi} ${0* pi} ${(1/5) * pi}" />
+            <parent link="segment_central" />
+            <child link="pince_g" />
+            <!-- <dynamics damping="0.0" friction="0.0"/> -->
+        </joint>
+
+    </xacro:macro>
+
+</robot>
