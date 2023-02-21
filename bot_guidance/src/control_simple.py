@@ -57,10 +57,24 @@ class controlSimple(Node):
 
     def process(self):
 
-        msg2 = Twist()
-        msg2.linear.x = 2.0
-        msg2.angular.z = 2.0
-        self.publisher.publish(msg2)
+        if x is None or x_target is None:
+            return 1
+
+        msg = Twist()
+        k = 1
+        k_linear = 1
+
+        theta_voulu = np.arctan2(y_target - y, x_target - x)
+        delta_theta = -theta_voulu - yaw
+        e = 2 * np.arctan(np.tan(delta_theta / 2))
+
+        msg.angular.z = k * e
+
+        dx = x - x_target
+        dy = y - y_target
+        distance = np.sqrt(dx * dx + dy * dy)
+        # msg.linear.x = k_linear * distance
+        self.publisher.publish(msg)
 
     def robot_position_callback(self, msg):
         global x, y, yaw
