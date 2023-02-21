@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Twist, Pose
@@ -37,9 +36,7 @@ def euler_from_quaternion(quaternion):
 
 class controlSimple(Node):
     def __init__(self):
-        print(1)
         super().__init__("control_simple")
-        print(2)
         self.subscription = self.create_subscription(
             PoseStamped, "robot_position", self.robot_position_callback, 10)
         self.subscription
@@ -57,24 +54,30 @@ class controlSimple(Node):
 
     def process(self):
 
-        if x is None or x_target is None:
-            return 1
+        msg2 = Twist()
 
-        msg = Twist()
-        k = 1
-        k_linear = 1
+        k_theta = 1.3
+        k_lin = 0.003        
+        b_lin = 0.5
+        
+        if yaw != None and x_target!=None:
+            X_target = np.array([x_target,y_target])
+            X_robot = np.array([x,y])
 
-        theta_voulu = np.arctan2(y_target - y, x_target - x)
-        delta_theta = -theta_voulu - yaw
-        e = 2 * np.arctan(np.tan(delta_theta / 2))
+            X_global = X_target-X_robot
 
-        msg.angular.z = k * e
+            u_lin = k_lin*np.linalg.norm(X_global) + b_lin
 
-        dx = x - x_target
-        dy = y - y_target
-        distance = np.sqrt(dx * dx + dy * dy)
-        # msg.linear.x = k_linear * distance
-        self.publisher.publish(msg)
+            w = -1*np.arctan2(X_global[1],X_global[0])
+            
+            delta_theta = w - yaw
+            u = k_theta*delta_theta
+
+            print(u,u_lin)
+            msg2.linear.x = u_lin
+            msg2.angular.z = u
+
+        self.publisher.publish(msg2)
 
     def robot_position_callback(self, msg):
         global x, y, yaw
@@ -82,26 +85,19 @@ class controlSimple(Node):
         y = msg.pose.position.y
         quat = msg.pose.orientation
         roll, pitch, yaw = euler_from_quaternion(quat)
-        print("robot position:",x,y,yaw)
 
     def target_callback(self, msg):
         global x_target, y_target
         x_target = msg.position.x
         y_target = msg.position.y
-        print("target position:",x_target,y_target)
 
 
 def main(args=None):
-    print(-2)
     rclpy.init(args=args)
-    print(-1)
     my_py_node = controlSimple()
-    print(0)
     rclpy.spin(my_py_node)
-
     my_py_node.destroy_node()
     rclpy.shutdown()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
