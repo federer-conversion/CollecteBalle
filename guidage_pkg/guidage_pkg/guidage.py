@@ -84,6 +84,7 @@ class Guidage(Node):
         # Variable
         self.x, self.y, self.yaw = None, None, None
         self.target_ball = [None, None]
+        self.target = [None, None]
         self.robot_state = Drone_State.start
 
         self.change_zone = True
@@ -189,6 +190,11 @@ class Guidage(Node):
             print(self.x, self.target_ball[0])
             self.action_state()
             self.update_state()
+
+            pose_msg = Pose()
+            pose_msg.position.x = float(self.target[0])
+            pose_msg.position.y = float(self.target[1])
+            self.target_publisher.publish(pose_msg)
         
 
     def update_state(self):
@@ -218,10 +224,6 @@ class Guidage(Node):
             global indice_suivi
             if self.x < 641 and self.target_ball[0] > 641:
                 if self.y < 360 : 
-                    print("suivre path_H (sens?)")
-                    print(path_H[0])
-                    print("robot pos", self.x, self.y)
-                    print(indice_suivi)
                     if indice_suivi == 0:
                         if(self.x < 531 - 54):
                             if(self.y > 151 - 54): 
@@ -233,6 +235,7 @@ class Guidage(Node):
                     if(self.x > 741-54):
                         if(self.y < 151 - 54):
                             self.change_zone = False
+                    return self.target(path_H[indice_suivi])
                 else:
                     print("suivre path_B (sens?)")
                     print(self.target_ball, path_B[0])
