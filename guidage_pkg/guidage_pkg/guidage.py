@@ -3,7 +3,7 @@ from rclpy.node import Node
 
 import numpy as np
 
-from std_msgs.msg import UInt16MultiArray
+from std_msgs.msg import UInt16MultiArray,Bool
 from geometry_msgs.msg import Pose
 
 from .Balle import *
@@ -29,7 +29,7 @@ def cost_fnct(pos_robot, zone, balle, K_d=1, K_a=4, K_z=1):
     cost_dist = ((balle_pose[0]*1.0-pos_robot[0])**2 +
                  (balle_pose[1]*1.0-pos_robot[1])**2)**0.5
     cost_age = balle.age
-    cost_zone = ((pos_robot[0]*1.0-zone[0])**2 +
+    cost_zone = ((balle_pose[0]*1.0-zone[0])**2 +
                  (balle_pose[1]*1.0-zone[1])**2)**0.5
     total_cos = K_d*cost_dist+K_a*cost_age + K_z*cost_zone
     return max(total_cos/100., 0.)
@@ -56,8 +56,20 @@ class Guidage(Node):
         self.subscription_safezones = self.create_subscription(
             UInt16MultiArray, '/safezone_positions', self.sub_safezones_callback, 10)
         self.subscription_safezones  # Avoid warning unused variable
+
+        # Balle in subscriber
+        self.subscription_safezones = self.create_subscription(
+            Bool, '/balle_in', self.balle_in_callback, 10)
+        self.subscription_safezones  # Avoid warning unused variable
+
+        # Robot safe subscriber
+        self.subscription_safezones = self.create_subscription(
+            Bool, '/robot_safe', self.robot_safe_callback, 10)
+        self.subscription_safezones  # Avoid warning unused variable
         # Save Safe zone position
         self.safezones_positions = np.array([])
+        self.searching=True
+        self.occur_in=0
 
         # Create ball positions publisher
         self.target_publisher = self.create_publisher(Pose, 'target', 10)
@@ -117,6 +129,18 @@ class Guidage(Node):
     def sub_safezones_callback(self, array_msg):
         self.safezones_positions_matrix = np.array(
             array_msg.data).reshape((-1, 2))
+        
+    def balle_in_callback(self, msg):
+        if msg.data and self.searching:
+            self.searching=False
+    
+    def robot_safe_callback(self, msg):
+        if msg.data and not self.searching and self.occur_in>100:
+            self.searching=True
+        elif msg.data and not self.searching and self.occur_in<=100:
+            self.occur_in+=1
+        elif not msg.data:
+            self.occur_in=0
 
     def publish_target(self, ind_min):
         if ind_min == -1:
@@ -129,6 +153,7 @@ class Guidage(Node):
             pose_msg = Pose()
             pose_msg.position.x = float(balle_pose[0])
             pose_msg.position.y = float(balle_pose[1])
+                
             self.target_publisher.publish(pose_msg)
 
 
