@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import math
 
 from sensor_msgs.msg import Image
-from std_msgs.msg import UInt16MultiArray,Bool
+from std_msgs.msg import UInt16MultiArray,Bool,Float64MultiArray
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Quaternion
 
@@ -81,6 +81,7 @@ class ImageParser(Node):
         self.robot_safe_publisher = self.create_publisher(
             Bool, 'robot_safe', 10)
         self.robot_safe_publisher
+
 
         # Create variable to store image
         self.image = np.zeros((240, 240, 3))
@@ -263,6 +264,8 @@ class ImageParser(Node):
         robot_safe_msg=Bool()
         robot_safe_msg.data=bool_safe
         self.robot_safe_publisher.publish(robot_safe_msg)
+
+
 
         # Publish the robot position
         robot_position_msg = PoseStamped()

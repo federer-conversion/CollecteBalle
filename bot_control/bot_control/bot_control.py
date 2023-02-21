@@ -56,7 +56,7 @@ class controlSimple(Node):
 
         msg2 = Twist()
 
-        k_theta = 1.3
+        k_theta = 2.6
         k_lin = 0.003        
         b_lin = 0.5
         

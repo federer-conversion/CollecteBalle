@@ -3,7 +3,7 @@ from rclpy.node import Node
 
 import numpy as np
 
-from std_msgs.msg import UInt16MultiArray,Bool
+from std_msgs.msg import UInt16MultiArray,Bool,Float64MultiArray
 from geometry_msgs.msg import Pose, PoseStamped
 from enum import Enum
 
@@ -94,6 +94,8 @@ class Guidage(Node):
         # Save balls position
         self.balles_pres = []
         self.safezones_positions_matrix = np.array([[0, 0], [0, 0]])
+        self.couple=0.
+
 
         # Safe zone position subscriber
         self.subscription_safezones = self.create_subscription(
@@ -119,8 +121,13 @@ class Guidage(Node):
             PoseStamped, "robot_position", self.robot_position_callback, 10)
         self.subscription_robot_pos
 
-        # Create ball positions publisher
+        # Create target positions publisher
         self.target_publisher = self.create_publisher(Pose, 'target', 10)
+
+        # Create pince control publisher
+        self.pince_pub = self.create_publisher(Float64MultiArray, '/velocity_controller/commands', 10)
+        self.pince_pub
+
     
     def robot_position_callback(self, msg):
         self.x = msg.pose.position.x
@@ -189,14 +196,18 @@ class Guidage(Node):
             self.searching=False
     
     def robot_safe_callback(self, msg):
-        if msg.data and not self.searching and self.occur_in>100:
+        if msg.data and not self.searching and self.occur_in>70:
             self.searching=True
-        elif msg.data and not self.searching and self.occur_in<=100:
+            self.occur_in=0
+
+        elif msg.data and not self.searching and self.occur_in<=70:
             self.occur_in+=1
         elif not msg.data:
             self.occur_in=0
 
+
     def publish_target(self, ind_min):
+        print(self.searching)
         if ind_min == -1:
             pose_msg = Pose()
             pose_msg.position.x = 0.
@@ -205,10 +216,29 @@ class Guidage(Node):
         else:
             balle_pose = self.balles_pres[ind_min].get_pose()
             pose_msg = Pose()
-            pose_msg.position.x = float(balle_pose[0])
-            pose_msg.position.y = float(balle_pose[1])
+            if self.searching:
+                pose_msg.position.x = float(balle_pose[0])
+                pose_msg.position.y = float(balle_pose[1])
+            else:
+                if self.x<640:
+                    if self.safezones_positions_matrix[0,0]<640:
+                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) +10.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) +10.
+                    else:
+                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) +10.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) +10.
+                else:
+                    if self.safezones_positions_matrix[0,0]>640:
+                        print(float(self.safezones_positions_matrix[0,0]) -10.)
+                        print(float(self.safezones_positions_matrix[0,1]) -10.)
+                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) -10.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) -10.
+                    else:
+                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) -10.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) -10.
                 
             self.target_publisher.publish(pose_msg)
+
 
     def update_state(self):
         global robot_state
