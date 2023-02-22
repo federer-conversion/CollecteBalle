@@ -1,15 +1,15 @@
 name: Federer_verification
+
 on:
   pull_request:
     branches: [ main, devel ]
   push:
     branches: [ main, devel ]
+
 jobs:
   build:
     
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:jammy
+    runs-on: ubuntu-20.04
     
     steps:
       - uses: ros-tooling/setup-ros@v0.5
