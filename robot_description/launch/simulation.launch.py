@@ -39,6 +39,6 @@ def generate_launch_description():
         display_launch,
         tennis_court_launch,
         camera_node,
-        control_node,
+        # control_node,
         guidage_node
     ])
