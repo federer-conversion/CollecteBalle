@@ -2,9 +2,12 @@ import rclpy
 from rclpy.node import Node
 
 import numpy as np
+import cv2
 
 from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray
 from geometry_msgs.msg import Pose, PoseStamped
+from sensor_msgs.msg import Image
+
 from enum import Enum
 
 from .Balle import *
@@ -20,7 +23,7 @@ class Drone_State(Enum):
     Go_to_ball = 3
     Go_to_safeZone = 4
     Go_out_safeZone = 5
-    
+
 
 def euler_from_quaternion(quaternion):
     """
@@ -114,11 +117,17 @@ class Guidage(Node):
         self.subscription_safezones = self.create_subscription(
             Bool, '/robot_safe', self.robot_safe_callback, 10)
         self.subscription_safezones  # Avoid warning unused variable
+
+        self.subscription = self.create_subscription(
+            Image, '/zenith_camera/image_raw', self.get_image_callback, 10)
+        self.subscription  # Avoid warning unused variable
+
         # Save Safe zone position
         self.safezones_positions = np.array([])
         self.searching = True
         self.occur_in = 0
         self.occur_catch = 0
+        self.image = np.zeros((240, 240, 3))
 
         # Robot position subscriber
         self.subscription_robot_pos = self.create_subscription(
@@ -213,23 +222,78 @@ class Guidage(Node):
         if msg.data and not self.searching and self.occur_in > 70:
             self.searching = True
             self.occur_in = 0
-
+            self.in_safezone = True
         elif msg.data and not self.searching and self.occur_in <= 70:
             self.occur_in += 1
         elif not msg.data:
             self.occur_in = 0
 
+    def get_image_callback(self, img_msg):
+        # Note: get encoding but for our case its rbg8
+        height, width, encoding = img_msg.height, img_msg.width, img_msg.encoding
+
+        # Store image and convert it in BGR
+        image_rgb = np.array(img_msg.data).reshape((height, width, 3))
+        self.image = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
+
     def publish_target(self):
         if self.x is not None:
-            # print(self.robot_state)
-            # print("pos robot : ", self.x, self.y, "cible : ", self.target[0], self.target[1])
+            print(self.robot_state)
             self.action_state()
             self.update_state()
 
         if self.target[0] is not None:
+            print("pos robot : ", self.x, self.y, "cible : ", self.target[0], self.target[1])
             pose_msg = Pose()
             pose_msg.position.x = float(self.target[0])
             pose_msg.position.y = float(self.target[1])
+
+        for balle in self.balles_pres:
+            x, y = balle.get_pose()
+            cv2.rectangle(self.image, (x-4, y-4),
+                          (x + 4, y + 4), (255, 0, 0), 2)
+            cv2.putText(self.image, str(balle.age), (x, y-10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+        try:
+            print(self.robot_state)
+            if self.robot_state == Drone_State.Go_to_safeZone:
+                if self.x < 640:
+                    if self.safezones_positions_matrix[0, 0] < 640:
+                        x, y = float(self.safezones_positions_matrix[0, 0]), float(
+                            self.safezones_positions_matrix[0, 1])
+                    else:
+                        x, y = float(self.safezones_positions_matrix[1, 0]), float(
+                            self.safezones_positions_matrix[1, 1])
+                else:
+                    if self.safezones_positions_matrix[0, 0] > 640:
+                        x, y = float(self.safezones_positions_matrix[0, 0]), float(
+                            self.safezones_positions_matrix[0, 1])
+                    else:
+                        x, y = float(self.safezones_positions_matrix[1, 0]), float(
+                            self.safezones_positions_matrix[1, 1])
+                cv2.rectangle(self.image, (x-20, y-20),
+                              (x + 20, y + 20), (0, 0, 255), 2)
+                cv2.putText(self.image, "Target", (x-60, y+2),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+            else:
+                x, y = self.target
+                cv2.rectangle(self.image, (x-4, y-4),
+                              (x + 4, y + 4), (0, 0, 255), 2)
+                cv2.putText(self.image, "Target", (x-60, y+2),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+        except Exception as e:
+            print("attente de target")
+            print(e)
+        try:
+            print("cap", 10*np.cos(self.yaw), 10*np.sin(self.yaw))
+            cv2.rectangle(self.image, (int(self.x)-20, int(self.y)-20),
+                          (int(self.x) + 20, int(self.y) + 20), (0, 255, 0), 2)
+            cv2.arrowedLine(self.image, (int(self.x), int(self.y)), (int(self.x+40*np.cos(self.yaw)), int(self.y-40*np.sin(self.yaw))),
+                            (0, 0, 255), 2)
+        except Exception as e:
+            print(e, self.x)
+        cv2.imshow("Image", self.image)
+        cv2.waitKey(1)
 
     def update_state(self):
         global indice_suivi
@@ -242,7 +306,8 @@ class Guidage(Node):
         elif (self.robot_state == Drone_State.Go_to_ball and not self.searching):
             self.robot_state = Drone_State.Go_to_safeZone
         elif (self.robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
-            self.robot_state = Drone_State.start
+            self.robot_state = Drone_State.Go_out_safeZone
+        # elif (self.robot_state == Drone_State.Go_out_safeZone)
 
     def action_state(self):
         if self.robot_state == Drone_State.start:
