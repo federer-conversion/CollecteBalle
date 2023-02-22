@@ -195,8 +195,8 @@ class Guidage(Node):
             if self.debug_mode:
                 print(balle_pres.age)
             if balle_pres.age > 10:
-                cost = min(cost_fnct((self.x, self.y), self.safezones_positions_matrix[0], balle_pres), cost_fnct(
-                    (self.x, self.y), self.safezones_positions_matrix[1], balle_pres))
+                cost = min(cost_fnct((100, 100), self.safezones_positions_matrix[0], balle_pres), cost_fnct(
+                    (100, 100), self.safezones_positions_matrix[1], balle_pres))
                 if self.debug_mode:
                     print(cost)
                 if cost < val_min:
@@ -220,7 +220,7 @@ class Guidage(Node):
                 self.searching = False
             else:
                 self.occur_catch += 1
-
+    
     def robot_safe_callback(self, msg):
         if msg.data and not self.searching and self.occur_in > 70:
             self.searching = True
@@ -285,6 +285,7 @@ class Guidage(Node):
             print(e, self.x)
         cv2.imshow("Image", self.image)
         cv2.waitKey(1)
+
 
     def update_state(self):
         global indice_suivi
