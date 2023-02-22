@@ -4,7 +4,7 @@ from geometry_msgs.msg import PoseStamped, Twist, Pose
 import numpy as np
 import math
 
-from std_msgs.msg import Int64
+from std_msgs.msg import Int64, Bool
 
 from enum import Enum
 
@@ -66,6 +66,9 @@ class controlSimple(Node):
         self.publisher = self.create_publisher(Twist, '/demo/cmd_vel', 10)
         self.publisher
 
+        self.pub_is_blocker = self.create_publisher(Bool, '/is_blocked', 10)
+        self.pub_is_blocker
+
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.process)
         self.get_logger().info(self.get_name() + " is launched")
@@ -78,32 +81,35 @@ class controlSimple(Node):
     def process(self):
 
         msg2 = Twist()
+        msg_blocked = Bool()
         
         k_theta = 2.6
         k_lin = 0.003    
         b_lin = 0.5
         
-
         if yaw != None and x_target!=None:
             ## Detection du blocage
+            X_target = np.array([x_target,y_target])
+            X_robot = np.array([x,y])
 
             vit = 0.
-            diff_vit_cmd_max = 10
+            diff_vit_cmd_max = 2.5
             if not math.isnan(self.X_past[0]):
                 timer_period = 0.1
                 vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
-                print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
+                # print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
                 if abs(self.u_lin_past-vit) > diff_vit_cmd_max:
-                    print("BLOCAGE")
-   
+                    msg_blocked.data = True
+                    # print("BLOCAGE")
+                else:
+                    msg_blocked.data = False
+                self.pub_is_blocker.publish(msg_blocked)
+
             ## Calculer de l'erreur
-            X_target = np.array([x_target,y_target])
-            X_robot = np.array([x,y])
             X_err = X_target-X_robot
 
             
-
             ## Calcul de la commande
             u_lin = 0.
             u = 0.
@@ -136,8 +142,8 @@ class controlSimple(Node):
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
-            if robot_state==5:
-                u_lin = -1000000.
+            if self.robot_state==5:
+                u_lin = -2.
                 u = 0.
                 print("marche_arriere")
     
