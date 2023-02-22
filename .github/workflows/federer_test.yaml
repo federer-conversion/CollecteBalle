@@ -2,9 +2,9 @@ name: Federer_verification
 
 on:
   pull_request:
-    branches: [ main, functions_devel ]
+    branches: [ main, devel, functions_devel ]
   push:
-    branches: [ main, functions_devel ]
+    branches: [ main, devel, functions_devel ]
 
 jobs:
   build_ws:
@@ -13,4 +13,7 @@ jobs:
       - uses: ros-tooling/setup-ros@v0.5
         with:
           required-ros-distributions: foxy
-      - run: vcs --help
+      - uses: ros-tooling/action-ros-ci@0.2.7
+        with:
+          target-ros2-distro: foxy
+          package-name: bot_control
