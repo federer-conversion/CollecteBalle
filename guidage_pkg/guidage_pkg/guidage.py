@@ -225,16 +225,21 @@ class Guidage(Node):
             global indice_suivi
             if self.x < 641 and self.target_ball[0] > 641:
                 if self.y < 360 : 
-                    if(self.x > 531 - 54):
-                        if(self.y < 151 + 54): 
+                    if(self.x > path_H[0][0] - 54):
+                        if(self.y < path_H[0][1] + 54): 
                             indice_suivi = 1
-                    if(self.x > 641 - 54):
-                        if(self.y < 61+20):
+                    if(self.x > path_H[1][0] - 54):
+                        if(self.y < path_H[1][1]+20):
                             indice_suivi = 2
                     self.target = path_H[indice_suivi]
                 else:
-                    print("suivre path_B (sens?)")
-                    print(self.target_ball, path_B[0])
+                    if(self.x > path_B[0][0] - 54):
+                        if(self.y < path_B[0][1] + 54): 
+                            indice_suivi = 1
+                    if(self.x > path_B[1][0] - 54):
+                        if(self.y < path_B[1][1]+20):
+                            indice_suivi = 2
+                    self.target = path_B[indice_suivi]
             elif self.x > 641 and self.target_ball[0] < 641:
                 if self.y < 360:
                     print("suivre path_H (sens oppo)")
