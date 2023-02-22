@@ -77,6 +77,9 @@ class controlSimple(Node):
         self.u_lin_past = math.nan
         self.robot_state = Drone_State.start
         self.comtpeur_bloc=0
+        self.yaw_past = math.nan
+
+        self.cnt_arriere = 0
 
 
     def process(self):
@@ -85,7 +88,7 @@ class controlSimple(Node):
         msg_blocked = Bool()
         
         k_theta = 2.6
-        k_lin = 0.003    
+        k_lin = 0.005    
         b_lin = 0.5
         
         if yaw != None and x_target!=None:
@@ -94,18 +97,18 @@ class controlSimple(Node):
             X_robot = np.array([x,y])
 
             vit = 0.
-            diff_vit_cmd_max = 2.5
+            diff_vit_cmd_max = 2.75
             if not math.isnan(self.X_past[0]):
                 timer_period = 0.1
                 vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
                 print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
-                if vit<0.11:
+                if vit<0.11 and self.robot_state != 6:
                     self.comtpeur_bloc+=1
                 else:
                     self.comtpeur_bloc=0
                 
-                if self.comtpeur_bloc > 100:
+                if self.comtpeur_bloc > 60 and self.robot_state != 1:
                     msg_blocked.data = True
 
                 elif (abs(self.u_lin_past-vit) > diff_vit_cmd_max and self.robot_state != 1):
@@ -113,7 +116,7 @@ class controlSimple(Node):
                     # print("BLOCAGE")
                 else:
                     msg_blocked.data = False
-                self.pub_is_blocker.publish(msg_blocked)
+                
 
             ## Calculer de l'erreur
             X_err = X_target-X_robot
@@ -125,7 +128,7 @@ class controlSimple(Node):
             err_theta_start = 10*np.pi/180
             dist_stop=18
             if self.robot_state==3:
-                dist_stop = 2
+                dist_stop = 1
             # err angulaire
             def sawtooth(x):
                 return (x+np.pi)%(2*np.pi)-np.pi
@@ -140,36 +143,47 @@ class controlSimple(Node):
             if abs(err_theta) >= err_theta_start: #
                 print("Turn to aim", " err_theta = ", err_theta*180/np.pi)
                 # print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
-                u_lin = 100*(-vit) # Essayer de tourner sur place
+                u_lin = 10*(-vit) # Essayer de tourner sur place
                 u = 2.6*err_theta
                 # print("u_lin =", u_lin, " u =", u)
             print(self.robot_state)
 
             if dist <= dist_stop:
-                print("Goad Reached")
+                print("Goal Reached")
                 u_lin = 0.
                 u = 0.
+                msg_blocked.data = False
             else:
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
+
             if self.robot_state==5 or self.robot_state==6 : # Etat marche arriere
-                u_lin = -2.
-                u = 0.
+                if self.cnt_arriere < 4:
+                    u_lin = -2.
+                    u = 0.
+                    self.cnt_arriere += 1
+                elif self.cnt_arriere >= 4:
+                    u_lin = 2.
+                    u = 0.
+                if not math.isnan(self.yaw_past):
+                    u = 2.5*sawtooth(self.yaw_past - yaw)
                 print("marche_arriere")
             if self.robot_state==1: # Etat start
-                u_lin = 0.
+                u_lin = -0.1 * self.u_lin_past
                 u = 0.
                 print("IDLE")
 
             # Memoire
             self.X_past = X_robot
             self.u_lin_past = u_lin
+            self.yaw_past = yaw
             # print(u,u_lin)
             msg2.linear.x = u_lin
             msg2.angular.z = u
 
         self.publisher.publish(msg2)
+        self.pub_is_blocker.publish(msg_blocked)
 
     def robot_position_callback(self, msg):
         global x, y, yaw

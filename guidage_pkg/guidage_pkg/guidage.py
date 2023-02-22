@@ -304,16 +304,18 @@ class Guidage(Node):
         cv2.waitKey(1)
 
 
+
     def update_state(self):
         global indice_suivi
-        print(self.recule_it)
-        print(self.ind_demar)
+        # print(self.recule_it)
+        # print(self.ind_demar)
+        print(self.robot_state)
         if self.blocked:
             self.state_save=self.robot_state
             self.robot_state = Drone_State.Blocked
-        elif (self.robot_state == Drone_State.Blocked and self.block_it<50):
+        elif (self.robot_state == Drone_State.Blocked and self.block_it<75):
             self.block_it+=1
-        elif (self.robot_state == Drone_State.Blocked and self.block_it>=50):
+        elif (self.robot_state == Drone_State.Blocked and self.block_it>=75):
             self.robot_state = Drone_State.start
             self.block_it=0
 
@@ -338,23 +340,48 @@ class Guidage(Node):
             self.recule_it=0
         # elif (self.robot_state == Drone_State.Go_out_safeZone)
 
+    def evitement(self):
+        msg=Int64()
+        msg.data=1
+        self.fsm_publisher.publish(msg)
+        msg_arr=Float64MultiArray()
+        msg_arr.data=[5.0]
+        self.pince_pub.publish(msg_arr)
+        if(self.target_ball[0] is None or self.x is None):
+            return 1
+        if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
+            self.change_zone = False
+        elif (self.x > 641 and self.target_ball[0] < 641) or (self.x < 641 and self.target_ball[0] > 641):
+            # self.robot_state = Drone_State.change_zone
+            self.change_zone = True
+        else:
+            # self.robot_state = Drone_State.change_zone
+            self.change_zone = True
+            print("erreur cas imprévu")
+
     def action_state(self):
         if self.robot_state == Drone_State.start:
-            msg=Int64()
-            msg.data=1
-            self.fsm_publisher.publish(msg)
-            msg_arr=Float64MultiArray()
-            msg_arr.data=[5.0]
-            self.pince_pub.publish(msg_arr)
-            if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
-                self.change_zone = False
-            elif (self.x > 641 and self.target_ball[0] < 641) or (self.x < 641 and self.target_ball[0] > 641):
-                self.change_zone = True
-            else:
-                self.change_zone = True
-                print("erreur cas imprévu")
+            # msg=Int64()
+            # msg.data=1
+            # self.fsm_publisher.publish(msg)
+            # msg_arr=Float64MultiArray()
+            # msg_arr.data=[5.0]
+            # self.pince_pub.publish(msg_arr)
+            # if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
+            #     self.change_zone = False
+            # elif (self.x > 641 and self.target_ball[0] < 641) or (self.x < 641 and self.target_ball[0] > 641):
+            #     self.change_zone = True
+            # else:
+            #     self.change_zone = True
+            #     print("erreur cas imprévu")
+
+            self.evitement()
 
         elif self.robot_state == Drone_State.change_zone:
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[0.0]
+            self.pince_pub.publish(msg_arr)
+
             msg=Int64()
             msg.data=2
             self.fsm_publisher.publish(msg)
@@ -397,12 +424,23 @@ class Guidage(Node):
                 self.change_zone = False
 
         elif self.robot_state == Drone_State.Go_to_ball:
-            msg=Int64()
-            msg.data=3
-            self.fsm_publisher.publish(msg)
-            self.target = self.target_ball
+            if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
+                msg_arr=Float64MultiArray()
+                msg_arr.data=[0.0]
+                self.pince_pub.publish(msg_arr)
+
+                msg=Int64()
+                msg.data=3
+                self.fsm_publisher.publish(msg)
+                self.target = self.target_ball
+            else:
+                self.robot_state = Drone_State.change_zone
 
         elif self.robot_state == Drone_State.Go_to_safeZone:
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[0.0]
+            self.pince_pub.publish(msg_arr)
+
             msg=Int64()
             msg.data=4
             self.fsm_publisher.publish(msg)
@@ -421,6 +459,10 @@ class Guidage(Node):
                     self.target = [self.safezones_positions_matrix[1,
                                                                    0] - 4, self.safezones_positions_matrix[1, 1] - 4]
         elif self.robot_state == Drone_State.Go_out_safeZone:
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[0.0]
+            self.pince_pub.publish(msg_arr)
+
             msg=Int64()
             msg.data=5
             self.fsm_publisher.publish(msg)
@@ -429,9 +471,16 @@ class Guidage(Node):
             self.pince_pub.publish(msg_arr)
 
         elif self.robot_state == Drone_State.Blocked:
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[0.0]
+            self.pince_pub.publish(msg_arr)
+
             msg=Int64()
             msg.data=6
             self.fsm_publisher.publish(msg)
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[0.0]
+            self.pince_pub.publish(msg_arr)
 
 
 
