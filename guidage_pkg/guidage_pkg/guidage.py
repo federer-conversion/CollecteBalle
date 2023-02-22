@@ -115,6 +115,7 @@ class Guidage(Node):
         self.safezones_positions = np.array([])
         self.searching=True
         self.occur_in=0
+        self.occur_catch=0
 
         # Robot position subscriber
         self.subscription_robot_pos = self.create_subscription(
@@ -179,8 +180,8 @@ class Guidage(Node):
             if self.debug_mode:
                 print(balle_pres.age)
             if balle_pres.age > 10:
-                cost = min(cost_fnct((100, 100), self.safezones_positions_matrix[0], balle_pres), cost_fnct(
-                    (100, 100), self.safezones_positions_matrix[1], balle_pres))
+                cost = min(cost_fnct((self.x, self.y), self.safezones_positions_matrix[0], balle_pres), cost_fnct(
+                    (self.x, self.y), self.safezones_positions_matrix[1], balle_pres))
                 if self.debug_mode:
                     print(cost)
                 if cost < val_min:
@@ -193,7 +194,11 @@ class Guidage(Node):
         
     def balle_in_callback(self, msg):
         if msg.data and self.searching:
-            self.searching=False
+            if self.occur_catch>15:
+                self.occur_catch=0
+                self.searching=False
+            else :
+                self.occur_catch+=1
     
     def robot_safe_callback(self, msg):
         if msg.data and not self.searching and self.occur_in>70:
@@ -222,20 +227,20 @@ class Guidage(Node):
             else:
                 if self.x<640:
                     if self.safezones_positions_matrix[0,0]<640:
-                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) +10.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) +10.
+                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) +4.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) +4.
                     else:
-                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) +10.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) +10.
+                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) +4.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) +4.
                 else:
                     if self.safezones_positions_matrix[0,0]>640:
                         print(float(self.safezones_positions_matrix[0,0]) -10.)
                         print(float(self.safezones_positions_matrix[0,1]) -10.)
-                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) -10.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) -10.
+                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) -4.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) -4.
                     else:
-                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) -10.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) -10.
+                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) -4.
+                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) -4.
                 
             self.target_publisher.publish(pose_msg)
 
