@@ -101,27 +101,24 @@ class controlSimple(Node):
             ## Calcul de la commande
             u_lin = 0.
             u = 0.
+            err_theta_start = 10*np.pi/180
+            dist_stop = 18
 
-            # cmd angulaire
-
+            # err angulaire
             def sawtooth(x):
                 return (x+np.pi)%(2*np.pi)-np.pi
             w = -1*np.arctan2(X_err[1],X_err[0])
             err_theta = sawtooth(w - yaw)
             
-
-            # cmd linéaire
+            # err linéaire
             dist = np.linalg.norm(X_err)
-            dist_stop = 18
-
-            err_theta_start = 10*np.pi/180
-            
-
+    
+            # commande
             # print("dist to goal = ", dist)
             if abs(err_theta) >= err_theta_start: #
                 print("Turn to aim", " err_theta = ", err_theta*180/np.pi)
                 print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
-                u_lin = 10*(-vit) # Essayer de tourner sur place
+                u_lin = 100*(-vit) # Essayer de tourner sur place
                 u = 2.6*err_theta
                 print("u_lin =", u_lin, " u =", u)
 
@@ -137,6 +134,7 @@ class controlSimple(Node):
                 u_lin = -1000000.
                 u = 0.
                 print("marche_arriere")
+    
             # Memoire
             self.X_past = X_robot
 
