@@ -65,7 +65,7 @@ def nettoyer(tab_de_balles):
     return nouv_tab
 
 
-def cost_fnct(pos_robot, zone, balle, K_d=1, K_a=4, K_z=1):
+def cost_fnct(pos_robot, zone, balle, K_d=10, K_a=4, K_z=1):
     balle_pose = balle.get_pose()
     cost_dist = ((balle_pose[0]*1.0-pos_robot[0])**2 +
                  (balle_pose[1]*1.0-pos_robot[1])**2)**0.5
