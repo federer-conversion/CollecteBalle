@@ -16,3 +16,7 @@ jobs:
       - uses: ros-tooling/action-ros-ci@0.2.7
         with:
           target-ros2-distro: foxy
+      - name: 'Run PEP8'
+        uses: quentinguidee/pep8-action@v1
+        with:
+          arguments: '--max-line-length=120'
