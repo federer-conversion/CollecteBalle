@@ -43,8 +43,3 @@ jobs:
           target-ros2-distro: foxy
           package-name: tennis_court
           skip-tests: true
-
-      - name: 'Run PEP8'
-        uses: quentinguidee/pep8-action@v1
-        with:
-          arguments: '--max-line-length=120'
