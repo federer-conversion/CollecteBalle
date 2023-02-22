@@ -1,0 +1,30 @@
+name: Build and Test
+on:
+  pull_request:
+    branches: [ main, devel ]
+  push:
+    branches: [ main, devel ]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt install ros-foxy-gazebo-ros
+      - run: sudo apt-get install ros-foxy-rqt-robot-steering
+      - run: sudo apt-get install ros-foxy-robot-localization
+      - run: sudo apt-get install ros-foxy-rqt-robot-xacro
+      - run: sudo apt install python3
+      - run: pip install numpy
+      - run: pip install matplotlib
+      - run: pip install opencv-python
+      - run: pip install evdev
+      - run: sudo apt-get install ros-foxy-controller-manager
+      - run: sudo apt-get install ros-foxy-gazebo-ros2-control
+      - run: sudo apt-get install ros-foxy-ros2-control
+
+      - name: Checking out
+        uses: actions/checkout@v2.3.4
+      
+      - name: Building and testing
+        uses: ichiro-its/ros2-ci@v1.0.0
+        with:
+          ros2-distro: foxy
