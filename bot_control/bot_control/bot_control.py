@@ -99,7 +99,7 @@ class controlSimple(Node):
                 vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
                 # print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
-                if abs(self.u_lin_past-vit) > diff_vit_cmd_max:
+                if abs(self.u_lin_past-vit) > diff_vit_cmd_max and self.robot_state != 1:
                     msg_blocked.data = True
                     # print("BLOCAGE")
                 else:
@@ -142,11 +142,16 @@ class controlSimple(Node):
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
-            if self.robot_state==5:
+            if self.robot_state==5: # Etat marche arriere
                 u_lin = -2.
                 u = 0.
                 print("marche_arriere")
-    
+
+            if self.robot_state==1: # Etat start
+                u_lin = 0.
+                u = 0.
+                print("IDLE")
+
             # Memoire
             self.X_past = X_robot
             self.u_lin_past = u_lin
