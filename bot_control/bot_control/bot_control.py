@@ -133,7 +133,7 @@ class controlSimple(Node):
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
-            if robot_state is Drone_State.Go_out_safeZone:
+            if robot_state==5:
                 u_lin = -1000000.
                 u = 0.
                 print("marche_arriere")
