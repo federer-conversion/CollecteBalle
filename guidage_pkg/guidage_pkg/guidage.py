@@ -4,7 +4,7 @@ from rclpy.node import Node
 import numpy as np
 import cv2
 
-from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray,Float64
+from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray,Float64, Int64
 from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import Image
 
@@ -143,7 +143,7 @@ class Guidage(Node):
         self.pince_pub
 
         # Create target positions publisher
-        self.recule_publisher = self.create_publisher(Float64, 'marche_arriere', 10)
+        self.fsm_publisher = self.create_publisher(Int64, 'fsm_state', 10)
 
     def robot_position_callback(self, msg):
         self.x = msg.pose.position.x
@@ -264,8 +264,10 @@ class Guidage(Node):
                 x, y = self.target
                 cv2.rectangle(self.image, (x-50, y-50),
                               (x + 50, y + 50), (0, 0, 255), 2)
-                cv2.putText(self.image, "Target", (x+100, y+2),
+                cv2.putText(self.image, "Target", (x-40, y+70),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+            elif self.robot_state == Drone_State.Go_out_safeZone:
+                print("recule")
             else:
                 x, y = self.target
                 cv2.rectangle(self.image, (x-4, y-4),
@@ -305,6 +307,9 @@ class Guidage(Node):
 
     def action_state(self):
         if self.robot_state == Drone_State.start:
+            msg=Int64()
+            msg.data=1
+            self.fsm_publisher.publish(msg)
             if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
                 self.change_zone = False
             elif (self.x > 641 and self.target_ball[0] < 641) or (self.x < 641 and self.target_ball[0] > 641):
@@ -314,6 +319,9 @@ class Guidage(Node):
                 print("erreur cas imprévu")
 
         elif self.robot_state == Drone_State.change_zone:
+            msg=Int64()
+            msg.data=2
+            self.fsm_publisher.publish(msg)
             global indice_suivi
             if self.x < 641 and self.target_ball[0] > 641:
                 if self.y < 360:
@@ -353,9 +361,15 @@ class Guidage(Node):
                 self.change_zone = False
 
         elif self.robot_state == Drone_State.Go_to_ball:
+            msg=Int64()
+            msg.data=3
+            self.fsm_publisher.publish(msg)
             self.target = self.target_ball
 
         elif self.robot_state == Drone_State.Go_to_safeZone:
+            msg=Int64()
+            msg.data=4
+            self.fsm_publisher.publish(msg)
             if self.x < 640:
                 if self.safezones_positions_matrix[0, 0] < 640:
                     self.target = [self.safezones_positions_matrix[0,
@@ -370,14 +384,10 @@ class Guidage(Node):
                 else:
                     self.target = [self.safezones_positions_matrix[1,
                                                                    0] - 4, self.safezones_positions_matrix[1, 1] - 4]
-        if self.robot_state == Drone_State.Go_out_safeZone:
-            msg=Float64()
-            msg.data=1.0
-            self.recule_publisher.publish(msg)
-        else:
-            msg=Float64()
-            msg.data=0.0
-            self.recule_publisher.publish(msg)
+        elif self.robot_state == Drone_State.Go_out_safeZone:
+            msg=Int64()
+            msg.data=5
+            self.fsm_publisher.publish(msg)
 
 
 
