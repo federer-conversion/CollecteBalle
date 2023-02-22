@@ -3,7 +3,6 @@
     xmlns:xacro="http://ros.org/wiki/xacro">
 
 
-
     <xacro:macro name="segment" params="name x y z joint_parent joint_origin_xyz joint_origin_rpy">
 
         <gazebo reference="${name}">
@@ -20,30 +19,27 @@
         <link name="${name}">
             <visual>
                 <geometry>
-                    <box size="${x} ${y} ${z}"/>
+                    <box size="${x} ${y} ${z}" />
                 </geometry>
                 <material name="Brown">
-                    <color rgba="0.30 0.15 0.0 1.0"/>
+                    <color rgba="0.30 0.15 0.0 1.0" />
                 </material>
             </visual>
             <collision>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <origin xyz="0 0 0" rpy="0 0 0" />
                 <geometry>
-                    <box size="${x} ${y} ${z}"/>
+                    <box size="${x} ${y} ${z}" />
                 </geometry>
             </collision>
 
-            <xacro:box_inertia m="0.00001" w="${x}" d="${y}" h="${z}"/>
+            <xacro:box_inertia m="0.00001" w="${x}" d="${y}" h="${z}" />
         </link>
 
         <joint name="${name}_joint" type="fixed">
-            <parent link="${joint_parent}"/>
-            <child link="${name}"/>
-            <origin xyz="${joint_origin_xyz}" rpy="${joint_origin_rpy}"/>
+            <parent link="${joint_parent}" />
+            <child link="${name}" />
+            <origin xyz="${joint_origin_xyz}" rpy="${joint_origin_rpy}" />
         </joint>
-
-
-
 
 
     </xacro:macro>
