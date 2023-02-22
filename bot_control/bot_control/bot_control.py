@@ -134,7 +134,7 @@ class controlSimple(Node):
                 u = k_theta*err_theta
 
             if robot_state==5:
-                u_lin = -1000000.
+                u_lin = -2.
                 u = 0.
                 print("marche_arriere")
             # Memoire

@@ -102,6 +102,7 @@ class Guidage(Node):
         self.balles_pres = []
         self.safezones_positions_matrix = np.array([[0, 0], [0, 0]])
         self.couple = 0.
+        self.recule_it=0
 
         # Safe zone position subscriber
         self.subscription_safezones = self.create_subscription(
@@ -118,13 +119,20 @@ class Guidage(Node):
             Bool, '/robot_safe', self.robot_safe_callback, 10)
         self.subscription_safezones  # Avoid warning unused variable
 
+        # Camera subscriber
         self.subscription = self.create_subscription(
             Image, '/zenith_camera/image_raw', self.get_image_callback, 10)
         self.subscription  # Avoid warning unused variable
 
+        # Blocked state subscriber
+        self.subscription_blocked = self.create_subscription(
+            Bool, '/is_blocked', self.get_blocked_callback, 10)
+        self.subscription_blocked  # Avoid warning unused variable
+
         # Save Safe zone position
         self.safezones_positions = np.array([])
         self.searching = True
+        self.blocked=False
         self.occur_in = 0
         self.occur_catch = 0
         self.image = np.zeros((240, 240, 3))
@@ -150,6 +158,9 @@ class Guidage(Node):
         self.y = msg.pose.position.y
         quat = msg.pose.orientation
         roll, pitch, self.yaw = euler_from_quaternion(quat)
+
+    def robot_blocked_callback(self, msg):
+        self.blocked=msg.data
 
     def sub_balls_callback(self, array_msg):
         global target_ball
@@ -291,7 +302,10 @@ class Guidage(Node):
 
     def update_state(self):
         global indice_suivi
-        if self.robot_state == Drone_State.start:
+        print(self.recule_it)
+        if self.blocked:
+            self.robot_state = Drone_State.Go_out_safeZone
+        elif self.robot_state == Drone_State.start:
             self.robot_state = Drone_State.change_zone
             indice_suivi = 0
         elif (self.robot_state == Drone_State.change_zone and not self.change_zone):
@@ -301,8 +315,13 @@ class Guidage(Node):
             self.robot_state = Drone_State.Go_to_safeZone
         elif (self.robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
             self.robot_state = Drone_State.Go_out_safeZone
-        elif (self.robot_state == Drone_State.Go_out_safeZone and not self.in_safezone):
+        elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it<50):
+
+            self.recule_it+=1
+        elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it>=50):
             self.robot_state = Drone_State.Go_to_ball
+            self.searching=True
+            self.recule_it=0
         # elif (self.robot_state == Drone_State.Go_out_safeZone)
 
     def action_state(self):
@@ -310,6 +329,9 @@ class Guidage(Node):
             msg=Int64()
             msg.data=1
             self.fsm_publisher.publish(msg)
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[5.0]
+            self.pince_pub.publish(msg_arr)
             if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
                 self.change_zone = False
             elif (self.x > 641 and self.target_ball[0] < 641) or (self.x < 641 and self.target_ball[0] > 641):
@@ -388,6 +410,9 @@ class Guidage(Node):
             msg=Int64()
             msg.data=5
             self.fsm_publisher.publish(msg)
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[5.0]
+            self.pince_pub.publish(msg_arr)
 
 
 
