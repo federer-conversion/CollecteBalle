@@ -76,10 +76,11 @@ class controlSimple(Node):
         self.X_past = np.array([math.nan,math.nan])
         self.u_lin_past = math.nan
         self.robot_state = Drone_State.start
+        self.comtpeur_bloc=0
 
 
     def process(self):
-
+        print("etat",self.robot_state)
         msg2 = Twist()
         msg_blocked = Bool()
         
@@ -98,8 +99,16 @@ class controlSimple(Node):
                 timer_period = 0.1
                 vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
-                # print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
-                if abs(self.u_lin_past-vit) > diff_vit_cmd_max and self.robot_state != 1:
+                print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
+                if vit<0.11:
+                    self.comtpeur_bloc+=1
+                else:
+                    self.comtpeur_bloc=0
+                
+                if self.comtpeur_bloc > 100:
+                    msg_blocked.data = True
+
+                elif (abs(self.u_lin_past-vit) > diff_vit_cmd_max and self.robot_state != 1):
                     msg_blocked.data = True
                     # print("BLOCAGE")
                 else:
@@ -114,8 +123,9 @@ class controlSimple(Node):
             u_lin = 0.
             u = 0.
             err_theta_start = 10*np.pi/180
-            dist_stop = 18
-
+            dist_stop=18
+            if self.robot_state==3:
+                dist_stop = 2
             # err angulaire
             def sawtooth(x):
                 return (x+np.pi)%(2*np.pi)-np.pi
@@ -133,6 +143,7 @@ class controlSimple(Node):
                 u_lin = 100*(-vit) # Essayer de tourner sur place
                 u = 2.6*err_theta
                 # print("u_lin =", u_lin, " u =", u)
+            print(self.robot_state)
 
             if dist <= dist_stop:
                 print("Goad Reached")
@@ -142,11 +153,10 @@ class controlSimple(Node):
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
-            if self.robot_state==5: # Etat marche arriere
+            if self.robot_state==5 or self.robot_state==6 : # Etat marche arriere
                 u_lin = -2.
                 u = 0.
                 print("marche_arriere")
-
             if self.robot_state==1: # Etat start
                 u_lin = 0.
                 u = 0.
