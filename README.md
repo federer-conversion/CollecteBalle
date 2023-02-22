@@ -139,7 +139,8 @@ Vous trouverez les documentations de communication entre client et équipes ici 
 - Chiffage prix : [chiffrage](data_sheet/prix.txt)
 - Documentation technique : [Doc tech](data_sheet/doc_tec.txt)
 
-
+Vous trouverez notre diaporama ici :
+- [Diaporama](Présentation_IS.pdf)
 
 ### Gestion de projet
 
