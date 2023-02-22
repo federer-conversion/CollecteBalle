@@ -26,7 +26,7 @@ sudo apt-get install ros-foxy-rqt-robot-xacro
 Install Python3, OpenCV and other required package :
 ```bash
 sudo apt install python3
-pip install cv2
+pip install opencv-python
 pip install evdev
 ```
 
@@ -77,15 +77,9 @@ source install/setup.bash
 ros2 run remote_controller_pkg remote_control_robot
 ```
 
-In another terminal, run in the root of your ROS2 workspace:
-
-```bash
-source /opt/ros/foxy/setup.bash
-source install/setup.bash
-ros2 run bot_control bot_control
-```
-
 Now enjoy the tennis court with the robot.
+
+#### Debug mode:
 
 If you want to the the output of the image processing, in another terminal run in the root of your ROS2 workspace:
 
