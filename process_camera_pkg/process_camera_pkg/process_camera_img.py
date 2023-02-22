@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import math
 
 from sensor_msgs.msg import Image
-from std_msgs.msg import UInt16MultiArray,Bool,Float64MultiArray
+from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray
 from geometry_msgs.msg import PoseStamped
 from geometry_msgs.msg import Quaternion
 
@@ -82,7 +82,6 @@ class ImageParser(Node):
             Bool, 'robot_safe', 10)
         self.robot_safe_publisher
 
-
         # Create variable to store image
         self.image = np.zeros((240, 240, 3))
 
@@ -92,7 +91,7 @@ class ImageParser(Node):
         self.robot_position = []
         self.pince_position = []
 
-        self.ball_in=False
+        self.ball_in = False
 
         # Create variable to parse HSV frame
         self.ball_low_HSV = (29, 0, 0)
@@ -147,18 +146,18 @@ class ImageParser(Node):
         image_pince = cv2.inRange(
             image_HSV, self.pince_low_HSV, self.pince_high_HSV)+cv2.inRange(
             image_HSV, self.pince_low_HSV_bis, self.pince_high_HSV_bis)
-        tab_inter=np.argwhere(image_pince>0)
+        tab_inter = np.argwhere(image_pince > 0)
         try:
-            minlig,maxlig=np.min(tab_inter[:,0]),np.max(tab_inter[:,0])
-            mincol,maxcol=np.min(tab_inter[:,1]),np.max(tab_inter[:,1])
-            for i in range(minlig,maxlig):
-                for j in range (mincol,maxcol):
-                    image_pince[i,j]=1
+            minlig, maxlig = np.min(tab_inter[:, 0]), np.max(tab_inter[:, 0])
+            mincol, maxcol = np.min(tab_inter[:, 1]), np.max(tab_inter[:, 1])
+            for i in range(minlig, maxlig):
+                for j in range(mincol, maxcol):
+                    image_pince[i, j] = 1
         except Exception as e:
             print(e)
-        image_ball_int=image_ball.copy()
-        image_ball[image_pince==1]=0
-        image_ball_int[image_pince==0]=0
+        image_ball_int = image_ball.copy()
+        image_ball[image_pince == 1] = 0
+        image_ball_int[image_pince == 0] = 0
         # image_ball[image_pince]=1
         # Classified and localized balls
         cnts = cv2.findContours(
@@ -175,31 +174,30 @@ class ImageParser(Node):
                 cv2.rectangle(self.image, (x, y),
                               (x + w, y + h), (0, 0, 255), 2)
 
-        if len(cnts_int)>0:
-            self.ball_in=True
+        if len(cnts_int) > 0:
+            self.ball_in = True
             for c in cnts_int:
                 x, y, w, h = cv2.boundingRect(c)
                 if self.debug_mode:
                     cv2.rectangle(self.image, (x, y),
-                                (x + w, y + h), (255, 0, 255), 2)
-        else :
-            self.ball_in=False
-
+                                  (x + w, y + h), (255, 0, 255), 2)
+        else:
+            self.ball_in = False
 
         # Classified and localized safezones
         cnts = cv2.findContours(
             image_safezone, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-        self.safezones_carre=[]
+        self.safezones_carre = []
         for c in cnts:
             x, y, w, h = cv2.boundingRect(c)
             self.safezone_positions.append(int(x+(w/2)))
             self.safezone_positions.append(int(y+(h/2)))
-            self.safezones_carre.append([x,y,w,h])
+            self.safezones_carre.append([x, y, w, h])
             if self.debug_mode:
                 cv2.rectangle(self.image, (x, y),
                               (x + w, y + h), (0, 255, 0), 2)
-        self.safezones_carre=np.array(self.safezones_carre)
+        self.safezones_carre = np.array(self.safezones_carre)
         # Classified and localized robot
         cnts = cv2.findContours(
             image_robot, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -220,17 +218,15 @@ class ImageParser(Node):
         cnts = cv2.findContours(
             image_pince, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-        bool_safe=False
+        bool_safe = False
         for c in cnts:
             x, y, w, h = cv2.boundingRect(c)
             # if(w>20 and h>20):
             self.pince_position.append(x+(w/2))
             self.pince_position.append(y+(h/2))
-            for i in range (2):
-                if ((x+(w/2))>self.safezones_carre[i][0] and (x+(w/2))<self.safezones_carre[i][0]+self.safezones_carre[i][2] and (y+(h/2))>self.safezones_carre[i][1] and (y+(h/2))<self.safezones_carre[i][1]+self.safezones_carre[i][2]):
-                    bool_safe=True
-
-            
+            for i in range(2):
+                if ((x+(w/2)) > self.safezones_carre[i][0] and (x+(w/2)) < self.safezones_carre[i][0]+self.safezones_carre[i][2] and (y+(h/2)) > self.safezones_carre[i][1] and (y+(h/2)) < self.safezones_carre[i][1]+self.safezones_carre[i][2]):
+                    bool_safe = True
 
             if self.debug_mode:
                 cv2.rectangle(self.image, (x, y),
@@ -256,16 +252,14 @@ class ImageParser(Node):
         self.safezone_publisher.publish(safezone_positions_msg)
 
         # Publish if we have a ball
-        balle_in_msg=Bool()
-        balle_in_msg.data=self.ball_in
+        balle_in_msg = Bool()
+        balle_in_msg.data = self.ball_in
         self.ball_in_publisher.publish(balle_in_msg)
 
         # Publish if the robot is in the zafe zone
-        robot_safe_msg=Bool()
-        robot_safe_msg.data=bool_safe
+        robot_safe_msg = Bool()
+        robot_safe_msg.data = bool_safe
         self.robot_safe_publisher.publish(robot_safe_msg)
-
-
 
         # Publish the robot position
         robot_position_msg = PoseStamped()

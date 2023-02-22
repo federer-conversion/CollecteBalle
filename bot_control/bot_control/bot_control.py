@@ -8,12 +8,14 @@ from std_msgs.msg import Int64
 
 from enum import Enum
 
+
 class Drone_State(Enum):
     start = 1
     change_zone = 2
     Go_to_ball = 3
     Go_to_safeZone = 4
     Go_out_safeZone = 5
+
 
 robot_state = Drone_State.start
 
@@ -22,6 +24,7 @@ x_target, y_target = None, None
 x, y, yaw = None, None, None
 
 marche_arriere = 0.0
+
 
 def euler_from_quaternion(quaternion):
     """
@@ -74,54 +77,52 @@ class controlSimple(Node):
         self.timer = self.create_timer(timer_period, self.process)
         self.get_logger().info(self.get_name() + " is launched")
 
-        self.X_past = np.array([math.nan,math.nan])
+        self.X_past = np.array([math.nan, math.nan])
 
     def process(self):
         global robot_state
 
         msg2 = Twist()
-        
-        k_theta = 2.6
-        k_lin = 0.003    
-        b_lin = 0.5
-        
 
-        if yaw != None and x_target!=None:
-            ## Calculer de l'erreur
-            X_target = np.array([x_target,y_target])
-            X_robot = np.array([x,y])
+        k_theta = 2.6
+        k_lin = 0.003
+        b_lin = 0.5
+
+        if yaw != None and x_target != None:
+            # Calculer de l'erreur
+            X_target = np.array([x_target, y_target])
+            X_robot = np.array([x, y])
             X_err = X_target-X_robot
 
             vit = 0.
-            
+
             if not math.isnan(self.X_past[0]):
                 timer_period = 0.1
                 vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
-            ## Calcul de la commande
+            # Calcul de la commande
             u_lin = 0.
             u = 0.
 
             # cmd angulaire
 
             def sawtooth(x):
-                return (x+np.pi)%(2*np.pi)-np.pi
-            w = -1*np.arctan2(X_err[1],X_err[0])
+                return (x+np.pi) % (2*np.pi)-np.pi
+            w = -1*np.arctan2(X_err[1], X_err[0])
             err_theta = sawtooth(w - yaw)
-            
 
             # cmd linéaire
             dist = np.linalg.norm(X_err)
             dist_stop = 18
 
             err_theta_start = 10*np.pi/180
-            
 
             # print("dist to goal = ", dist)
-            if abs(err_theta) >= err_theta_start: #
+            if abs(err_theta) >= err_theta_start:
                 print("Turn to aim", " err_theta = ", err_theta*180/np.pi)
-                print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
-                u_lin = 10*(-vit) # Essayer de tourner sur place
+                print("vitesse lin = ", vit, " X_actu = ",
+                      X_robot, " X_past = ", self.X_past)
+                u_lin = 10*(-vit)  # Essayer de tourner sur place
                 u = 2.6*err_theta
                 print("u_lin =", u_lin, " u =", u)
 
@@ -133,7 +134,7 @@ class controlSimple(Node):
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
-            if robot_state==5:
+            if robot_state == 5:
                 u_lin = -1000000.
                 u = 0.
                 print("marche_arriere")
@@ -169,6 +170,7 @@ def main(args=None):
     rclpy.spin(my_py_node)
     my_py_node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
