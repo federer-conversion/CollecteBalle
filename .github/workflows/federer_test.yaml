@@ -16,3 +16,35 @@ jobs:
       - uses: ros-tooling/action-ros-ci@0.2.7
         with:
           target-ros2-distro: foxy
+          package-name: bot_control
+          skip-tests: true
+      - uses: ros-tooling/action-ros-ci@0.2.7
+        with:
+          target-ros2-distro: foxy
+          package-name: guidage_pkg
+          skip-tests: true
+      - uses: ros-tooling/action-ros-ci@0.2.7
+        with:
+          target-ros2-distro: foxy
+          package-name: process_camera_pkg
+          skip-tests: true
+      - uses: ros-tooling/action-ros-ci@0.2.7
+        with:
+          target-ros2-distro: foxy
+          package-name: remote_controller_pkg
+          skip-tests: true
+      - uses: ros-tooling/action-ros-ci@0.2.7
+        with:
+          target-ros2-distro: foxy
+          package-name: robot_description
+          skip-tests: true
+      - uses: ros-tooling/action-ros-ci@0.2.7
+        with:
+          target-ros2-distro: foxy
+          package-name: tennis_court
+          skip-tests: true
+
+      # - name: 'Run PEP8'
+      #   uses: quentinguidee/pep8-action@v1
+      #   with:
+      #     arguments: '--max-line-length=120'
