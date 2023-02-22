@@ -7,7 +7,7 @@ PO: Damien ESNAULT
 
 - Améliorer l'affichage du debug caméra
 - Finir la FSM
-- Améliorer la fonction dec cout
+- Améliorer la fonction de cout
 - Améliorer le controle
 - Github Action
 
@@ -22,7 +22,7 @@ PO: Damien ESNAULT
 	* Mettre en place une FSM pour gérer la récupération sucessive de ball
 - Améliorer le controle (Mirado)
 	* Améliorer le controle pour éviter les phénomènes de latence sur la rotation
-- Github Action
+- Github Action (Damien)
 
 ## Challenges techniques
 

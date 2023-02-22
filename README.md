@@ -26,7 +26,7 @@ sudo apt-get install ros-foxy-rqt-robot-xacro
 Install Python3, OpenCV and other required package :
 ```bash
 sudo apt install python3
-pip install cv2
+pip install opencv-python
 pip install evdev
 ```
 
