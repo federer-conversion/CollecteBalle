@@ -6,9 +6,11 @@ on:
     branches: [ main, devel ]
 jobs:
   build:
+    
     runs-on: ubuntu-latest
     container:
       image: ubuntu:jammy
+    
     steps:
       - uses: ros-tooling/setup-ros@v0.5
       with:
