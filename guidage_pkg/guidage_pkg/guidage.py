@@ -159,7 +159,7 @@ class Guidage(Node):
         quat = msg.pose.orientation
         roll, pitch, self.yaw = euler_from_quaternion(quat)
 
-    def robot_blocked_callback(self, msg):
+    def get_blocked_callback(self, msg):
         self.blocked=msg.data
 
     def sub_balls_callback(self, array_msg):
