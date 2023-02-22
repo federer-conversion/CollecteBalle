@@ -119,7 +119,7 @@ class controlSimple(Node):
                 u = k_theta*err_theta
 
             if marche_arriere == 1.0:
-                u_lin = -1.
+                u_lin = -1000000.
                 u = 0.
                 print("marche_arriere")
             # Memoire
