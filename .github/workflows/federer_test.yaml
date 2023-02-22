@@ -9,9 +9,8 @@ on:
 jobs:
   build_ws:
     runs-on: ubuntu-20.04
-    
     steps:
       - uses: ros-tooling/setup-ros@v0.5
-      with:
-        required-ros-distributions: foxy
+        with:
+          required-ros-distributions: foxy
       - run: vcs --help
