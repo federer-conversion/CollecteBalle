@@ -1,4 +1,4 @@
-name: Federer verification
+name: Federer_verification
 on:
   pull_request:
     branches: [ main, devel ]
