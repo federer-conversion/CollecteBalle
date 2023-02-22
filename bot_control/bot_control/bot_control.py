@@ -4,10 +4,13 @@ from geometry_msgs.msg import PoseStamped, Twist, Pose
 import numpy as np
 import math
 
+from std_msgs.msg import Float64
+
 # Variable
 x_target, y_target = None, None
 x, y, yaw = None, None, None
 
+marche_arriere = 0.0
 
 def euler_from_quaternion(quaternion):
     """
@@ -45,6 +48,10 @@ class controlSimple(Node):
             Pose, "target", self.target_callback, 10)
         self.subscription2
 
+        self.subs_marche_arriere = self.create_subscription(
+            Float64, "marche_arriere", self.marche_arriere_callback, 10)
+        self.subs_marche_arriere
+
         self.publisher = self.create_publisher(Twist, '/demo/cmd_vel', 10)
         self.publisher
 
@@ -52,28 +59,73 @@ class controlSimple(Node):
         self.timer = self.create_timer(timer_period, self.process)
         self.get_logger().info(self.get_name() + " is launched")
 
+        self.X_past = np.array([math.nan,math.nan])
+
     def process(self):
+        global marche_arriere
 
         msg2 = Twist()
-
+        
         k_theta = 2.6
-        k_lin = 0.003        
+        k_lin = 0.003    
         b_lin = 0.5
         
+
         if yaw != None and x_target!=None:
+            ## Calculer de l'erreur
             X_target = np.array([x_target,y_target])
             X_robot = np.array([x,y])
+            X_err = X_target-X_robot
 
-            X_global = X_target-X_robot
-
-            u_lin = k_lin*np.linalg.norm(X_global) + b_lin
-
-            w = -1*np.arctan2(X_global[1],X_global[0])
+            vit = 0.
             
-            delta_theta = w - yaw
-            u = k_theta*delta_theta
+            if not math.isnan(self.X_past[0]):
+                timer_period = 0.1
+                vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
-            print(u,u_lin)
+            ## Calcul de la commande
+            u_lin = 0.
+            u = 0.
+
+            # cmd angulaire
+
+            def sawtooth(x):
+                return (x+np.pi)%(2*np.pi)-np.pi
+            w = -1*np.arctan2(X_err[1],X_err[0])
+            err_theta = sawtooth(w - yaw)
+            
+
+            # cmd linéaire
+            dist = np.linalg.norm(X_err)
+            dist_stop = 18
+
+            err_theta_start = 10*np.pi/180
+            
+
+            # print("dist to goal = ", dist)
+            if abs(err_theta) >= err_theta_start: #
+                print("Turn to aim", " err_theta = ", err_theta*180/np.pi)
+                print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
+                u_lin = 0.1*(-vit) # Essayer de tourner sur place
+                u = 2.6*err_theta
+                print("u_lin =", u_lin, " u =", u)
+
+            if dist <= dist_stop:
+                print("Goad Reached")
+                u_lin = 0.
+                u = 0.
+            else:
+                u_lin = k_lin*dist + b_lin
+                u = k_theta*err_theta
+
+            if marche_arriere == 1.0:
+                u_lin = -1.
+                u = 0.
+                print("marche_arriere")
+            # Memoire
+            self.X_past = X_robot
+
+            # print(u,u_lin)
             msg2.linear.x = u_lin
             msg2.angular.z = u
 
@@ -90,6 +142,10 @@ class controlSimple(Node):
         global x_target, y_target
         x_target = msg.position.x
         y_target = msg.position.y
+
+    def marche_arriere_callback(self, msg):
+        global marche_arriere 
+        marche_arriere = msg.data
 
 
 def main(args=None):

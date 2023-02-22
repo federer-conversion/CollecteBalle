@@ -3,7 +3,7 @@ from rclpy.node import Node
 
 import numpy as np
 
-from std_msgs.msg import UInt16MultiArray,Bool,Float64MultiArray
+from std_msgs.msg import UInt16MultiArray,Bool,Float64MultiArray, Float64
 from geometry_msgs.msg import Pose, PoseStamped
 from enum import Enum
 
@@ -12,11 +12,13 @@ from .Balle import *
 # path_B = np.load('path_B.npy')
 # path_H = np.load('path_H.npy')
 
+en_arriere = 0
 class Drone_State(Enum):
     start = 1
     change_zone = 1
     Go_to_ball = 2
     Go_to_safeZone = 3
+    marche_arriere_state = 4
 
 def euler_from_quaternion(quaternion):
     """
@@ -129,6 +131,9 @@ class Guidage(Node):
         self.pince_pub = self.create_publisher(Float64MultiArray, '/velocity_controller/commands', 10)
         self.pince_pub
 
+        # Create target positions publisher
+        self.marche_arriere = self.create_publisher(Float64, 'marche_arriere', 10)
+        self.marche_arriere
     
     def robot_position_callback(self, msg):
         self.x = msg.pose.position.x
@@ -201,17 +206,76 @@ class Guidage(Node):
                 self.occur_catch+=1
     
     def robot_safe_callback(self, msg):
-        if msg.data and not self.searching and self.occur_in>70:
+        global en_arriere
+
+        self.in_safezone = msg.data
+
+        if msg.data and not self.searching and self.occur_in>150:
             self.searching=True
             self.occur_in=0
 
-        elif msg.data and not self.searching and self.occur_in<=70:
+            en_arriere = 1
+            # msg = Float64()
+            # msg.data = 0.0
+            # self.marche_arriere.publish(msg)
+
+
+        elif msg.data and not self.searching and self.occur_in<=150:
             self.occur_in+=1
+
+            # if self.occur_in >= 200: 
+            #     msg = Float64()
+            #     msg.data = 1.0
+            #     self.marche_arriere.publish(msg)
+
+            # else:
+            #     msg = Float64()
+            #     msg.data = 0.0
+            #     self.marche_arriere.publish(msg)
+
+
         elif not msg.data:
             self.occur_in=0
 
+        if en_arriere:
+            msg = Float64()
+            msg.data = 1.0
+            self.marche_arriere.publish(msg)
+        else:
+            msg = Float64()
+            msg.data = 0.0
+            self.marche_arriere.publish(msg)
+
+            en_arriere = 0
 
     def publish_target(self, ind_min):
+        global en_arriere
+        
+
+        if en_arriere == 1:
+
+            if self.occur_in>60:
+                # self.searching=True
+                self.occur_in=0
+
+                msg = Float64()
+                msg.data = 0.0
+                self.marche_arriere.publish(msg)
+
+                en_arriere = 0
+
+            elif self.occur_in<=60:
+                self.occur_in+=1
+
+                msg = Float64()
+                msg.data = 1.0
+                self.marche_arriere.publish(msg)
+
+                en_arriere = 1
+
+            else:
+                en_arriere = 0
+
         print(self.searching)
         if ind_min == -1:
             pose_msg = Pose()
@@ -253,8 +317,60 @@ class Guidage(Node):
             robot_state = Drone_State.Go_to_ball
         elif (robot_state == Drone_State.Go_to_ball and self.capture_ball):
             robot_state = Drone_State.Go_to_safeZone
-        elif (robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
-            robot_state = Drone_State.start
+
+        elif (robot_state == Drone_State.Go_to_safeZone ):
+            
+            
+
+            robot_state = Drone_State.marche_arriere_state
+
+        elif (robot_state == Drone_State.marche_arriere_state):
+            # if self.in_safezone:
+            #     msg = Float64()
+            #     msg.data = 1.0
+            #     self.marche_arriere.publish(msg)
+
+            #     robot_state = Drone_State.marche_arriere_state
+            #     print("state = marche aarriere")
+            # else:
+            #     msg = Float64()
+            #     msg.data = 0.0
+            #     self.marche_arriere.publish(msg)
+            #     print("state = start")
+            #     robot_state = Drone_State.start
+
+            if self.occur_in>200:
+                # self.searching=True
+                self.occur_in=0
+
+                msg = Float64()
+                msg.data = 0.0
+                self.marche_arriere.publish(msg)
+
+            elif self.occur_in<=200:
+                self.occur_in+=1
+
+                msg = Float64()
+                msg.data = 1.0
+                self.marche_arriere.publish(msg)
+
+                robot_state = Drone_State.marche_arriere_state
+
+            robot_state = Drone_State.marche_arriere_state
+
+                # if self.occur_in >= 200: 
+                #     msg = Float64()
+                #     msg.data = 1.0
+                #     self.marche_arriere.publish(msg)
+
+                # else:
+                #     msg = Float64()
+                #     msg.data = 0.0
+                #     self.marche_arriere.publish(msg)
+
+
+    
+
 
     def state(self):
         if self.robot_state == Drone_State.start:
