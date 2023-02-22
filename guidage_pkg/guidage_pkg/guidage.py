@@ -4,7 +4,7 @@ from rclpy.node import Node
 import numpy as np
 import cv2
 
-from std_msgs.msg import UInt16MultiArray,Bool,Float64MultiArray
+from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray
 from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import Image
 
@@ -12,14 +12,18 @@ from enum import Enum
 
 from .Balle import *
 
-# path_B = np.load('path_B.npy')
-# path_H = np.load('path_H.npy')
+path_H = [[531, 151], [641, 61], [751, 151]]
+path_B = [[531, 575], [641, 665], [751, 575]]
+indice_suivi = 0
+
 
 class Drone_State(Enum):
     start = 1
     change_zone = 2
     Go_to_ball = 3
     Go_to_safeZone = 4
+    Go_out_safeZone = 5
+
 
 def euler_from_quaternion(quaternion):
     """
@@ -80,14 +84,14 @@ class Guidage(Node):
         self.declare_parameter('display_mode', False)
         self.debug_mode = self.get_parameter(
             'display_mode').get_parameter_value().bool_value
-        
+
         # Variable
         self.x, self.y, self.yaw = None, None, None
-        self.target_ball = None
+        self.target_ball = [None, None]
+        self.target = [None, None]
         self.robot_state = Drone_State.start
 
         self.change_zone = True
-        self.capture_ball = False
         self.in_safezone = False
 
         # Balls position subscriber
@@ -97,8 +101,7 @@ class Guidage(Node):
         # Save balls position
         self.balles_pres = []
         self.safezones_positions_matrix = np.array([[0, 0], [0, 0]])
-        self.couple=0.
-
+        self.couple = 0.
 
         # Safe zone position subscriber
         self.subscription_safezones = self.create_subscription(
@@ -121,9 +124,9 @@ class Guidage(Node):
 
         # Save Safe zone position
         self.safezones_positions = np.array([])
-        self.searching=True
-        self.occur_in=0
-        self.occur_catch=0
+        self.searching = True
+        self.occur_in = 0
+        self.occur_catch = 0
         self.image = np.zeros((240, 240, 3))
 
         # Robot position subscriber
@@ -135,10 +138,10 @@ class Guidage(Node):
         self.target_publisher = self.create_publisher(Pose, 'target', 10)
 
         # Create pince control publisher
-        self.pince_pub = self.create_publisher(Float64MultiArray, '/velocity_controller/commands', 10)
+        self.pince_pub = self.create_publisher(
+            Float64MultiArray, '/velocity_controller/commands', 10)
         self.pince_pub
 
-    
     def robot_position_callback(self, msg):
         self.x = msg.pose.position.x
         self.y = msg.pose.position.y
@@ -195,29 +198,35 @@ class Guidage(Node):
                     print(cost)
                 if cost < val_min:
                     val_min, ind_min = cost, ind
-        self.publish_target(ind_min)
+
+        if ind_min == -1:
+            self.target_ball = [0, 0]
+        else:
+            self.target_ball = self.balles_pres[ind_min].get_pose()
+
+        self.publish_target()
 
     def sub_safezones_callback(self, array_msg):
         self.safezones_positions_matrix = np.array(
             array_msg.data).reshape((-1, 2))
-        
+
     def balle_in_callback(self, msg):
         if msg.data and self.searching:
-            if self.occur_catch>15:
-                self.occur_catch=0
-                self.searching=False
-            else :
-                self.occur_catch+=1
-    
-    def robot_safe_callback(self, msg):
-        if msg.data and not self.searching and self.occur_in>70:
-            self.searching=True
-            self.occur_in=0
+            if self.occur_catch > 15:
+                self.occur_catch = 0
+                self.searching = False
+            else:
+                self.occur_catch += 1
 
-        elif msg.data and not self.searching and self.occur_in<=70:
-            self.occur_in+=1
+    def robot_safe_callback(self, msg):
+        if msg.data and not self.searching and self.occur_in > 70:
+            self.searching = True
+            self.occur_in = 0
+            self.in_safezone = True
+        elif msg.data and not self.searching and self.occur_in <= 70:
+            self.occur_in += 1
         elif not msg.data:
-            self.occur_in=0
+            self.occur_in = 0
 
     def get_image_callback(self, img_msg):
         # Note: get encoding but for our case its rbg8
@@ -227,101 +236,146 @@ class Guidage(Node):
         image_rgb = np.array(img_msg.data).reshape((height, width, 3))
         self.image = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR)
 
-    def publish_target(self, ind_min):
-        print(self.searching)
-        if ind_min == -1:
+    def publish_target(self):
+        if self.x is not None:
+            print(self.robot_state)
+            self.action_state()
+            self.update_state()
+
+        if self.target[0] is not None:
+            print("pos robot : ", self.x, self.y, "cible : ", self.target[0], self.target[1])
             pose_msg = Pose()
-            pose_msg.position.x = 0.
-            pose_msg.position.y = 0.
-            self.target_publisher.publish(pose_msg)
-        else:
-            balle_pose = self.balles_pres[ind_min].get_pose()
-            pose_msg = Pose()
-            if self.searching:
-                pose_msg.position.x = float(balle_pose[0])
-                pose_msg.position.y = float(balle_pose[1])
-            else:
-                if self.x<640:
-                    if self.safezones_positions_matrix[0,0]<640:
-                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) +4.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) +4.
-                    else:
-                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) +4.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) +4.
-                else:
-                    if self.safezones_positions_matrix[0,0]>640:
-                        print(float(self.safezones_positions_matrix[0,0]) -10.)
-                        print(float(self.safezones_positions_matrix[0,1]) -10.)
-                        pose_msg.position.x = float(self.safezones_positions_matrix[0,0]) -4.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[0,1]) -4.
-                    else:
-                        pose_msg.position.x = float(self.safezones_positions_matrix[1,0]) -4.
-                        pose_msg.position.y = float(self.safezones_positions_matrix[1,1]) -4.
-                
-            self.target_publisher.publish(pose_msg)
+            pose_msg.position.x = float(self.target[0])
+            pose_msg.position.y = float(self.target[1])
+
         for balle in self.balles_pres:
-            x,y=balle.get_pose()
+            x, y = balle.get_pose()
             cv2.rectangle(self.image, (x-4, y-4),
-                              (x + 4, y + 4), (255, 0, 0), 2)
-            cv2.putText(self.image, str(balle.age), (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 2)
+                          (x + 4, y + 4), (255, 0, 0), 2)
+            cv2.putText(self.image, str(balle.age), (x, y-10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
         try:
             print(self.robot_state)
-            if self.robot_state==Drone_State.Go_to_safeZone:
-                if self.x<640:
-                    if self.safezones_positions_matrix[0,0]<640:
-                        x,y = float(self.safezones_positions_matrix[0,0]),float(self.safezones_positions_matrix[0,1])
+            if self.robot_state == Drone_State.Go_to_safeZone:
+                if self.x < 640:
+                    if self.safezones_positions_matrix[0, 0] < 640:
+                        x, y = float(self.safezones_positions_matrix[0, 0]), float(
+                            self.safezones_positions_matrix[0, 1])
                     else:
-                        x ,y= float(self.safezones_positions_matrix[1,0]),float(self.safezones_positions_matrix[1,1])
+                        x, y = float(self.safezones_positions_matrix[1, 0]), float(
+                            self.safezones_positions_matrix[1, 1])
                 else:
-                    if self.safezones_positions_matrix[0,0]>640:
-                        x,y = float(self.safezones_positions_matrix[0,0]),float(self.safezones_positions_matrix[0,1])
+                    if self.safezones_positions_matrix[0, 0] > 640:
+                        x, y = float(self.safezones_positions_matrix[0, 0]), float(
+                            self.safezones_positions_matrix[0, 1])
                     else:
-                        x,y= float(self.safezones_positions_matrix[1,0]) ,float(self.safezones_positions_matrix[1,1]) 
+                        x, y = float(self.safezones_positions_matrix[1, 0]), float(
+                            self.safezones_positions_matrix[1, 1])
                 cv2.rectangle(self.image, (x-20, y-20),
                               (x + 20, y + 20), (0, 0, 255), 2)
-                cv2.putText(self.image, "Target", (x-60, y+2), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
+                cv2.putText(self.image, "Target", (x-60, y+2),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
             else:
-                target=self.balles_pres[ind_min]
-                x,y=target.get_pose()
+                x, y = self.target
                 cv2.rectangle(self.image, (x-4, y-4),
-                                (x + 4, y + 4), (0, 0, 255), 2)
-                cv2.putText(self.image, "Target", (x-60, y+2), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
+                              (x + 4, y + 4), (0, 0, 255), 2)
+                cv2.putText(self.image, "Target", (x-60, y+2),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
         except Exception as e:
             print("attente de target")
             print(e)
         try:
-            print("cap",10*np.cos(self.yaw),10*np.sin(self.yaw))
+            print("cap", 10*np.cos(self.yaw), 10*np.sin(self.yaw))
             cv2.rectangle(self.image, (int(self.x)-20, int(self.y)-20),
-                                    (int(self.x) + 20, int(self.y) + 20), (0, 255, 0), 2)
-            cv2.arrowedLine(self.image, (int(self.x),int(self.y)), (int(self.x+40*np.cos(self.yaw)),int(self.y-40*np.sin(self.yaw))),
-                                     (0,0,255), 2) 
+                          (int(self.x) + 20, int(self.y) + 20), (0, 255, 0), 2)
+            cv2.arrowedLine(self.image, (int(self.x), int(self.y)), (int(self.x+40*np.cos(self.yaw)), int(self.y-40*np.sin(self.yaw))),
+                            (0, 0, 255), 2)
         except Exception as e:
-            print(e,self.x)
+            print(e, self.x)
         cv2.imshow("Image", self.image)
         cv2.waitKey(1)
 
-
     def update_state(self):
-        global robot_state
-        if robot_state == Drone_State.start:
-            robot_state = Drone_State.change_zone
-        elif (robot_state == Drone_State.change_zone and not self.change_zone):
-            robot_state = Drone_State.Go_to_ball
-        elif (robot_state == Drone_State.Go_to_ball and self.capture_ball):
-            robot_state = Drone_State.Go_to_safeZone
-        elif (robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
-            robot_state = Drone_State.start
-
-    def state(self):
+        global indice_suivi
         if self.robot_state == Drone_State.start:
-            if self.x < 641 and self.target_ball[0] < 641 or self.x > 641 and self.target_ball[0] > 641:
+            self.robot_state = Drone_State.change_zone
+            indice_suivi = 0
+        elif (self.robot_state == Drone_State.change_zone and not self.change_zone):
+            self.change_zone = True
+            self.robot_state = Drone_State.Go_to_ball
+        elif (self.robot_state == Drone_State.Go_to_ball and not self.searching):
+            self.robot_state = Drone_State.Go_to_safeZone
+        elif (self.robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
+            self.robot_state = Drone_State.Go_out_safeZone
+        # elif (self.robot_state == Drone_State.Go_out_safeZone)
+
+    def action_state(self):
+        if self.robot_state == Drone_State.start:
+            if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
                 self.change_zone = False
-            elif self.x > 641 and self.target_ball[0] < 641 or self.x > 641 and self.target_ball[0] < 641:
+            elif (self.x > 641 and self.target_ball[0] < 641) or (self.x < 641 and self.target_ball[0] > 641):
                 self.change_zone = True
             else:
                 self.change_zone = True
                 print("erreur cas imprévu")
-        
+
+        elif self.robot_state == Drone_State.change_zone:
+            global indice_suivi
+            if self.x < 641 and self.target_ball[0] > 641:
+                if self.y < 360:
+                    if (self.x > path_H[0][0] - 54):
+                        if (self.y < path_H[0][1] + 54):
+                            indice_suivi = 1
+                    if (self.x > path_H[1][0] - 54):
+                        if (self.y < path_H[1][1]+20):
+                            indice_suivi = 2
+                    self.target = path_H[indice_suivi]
+                else:
+                    if (self.x > path_B[0][0] - 54):
+                        if (self.y < path_B[0][1] + 54):
+                            indice_suivi = 1
+                    if (self.x > path_B[1][0] - 54):
+                        if (self.y < path_B[1][1]+20):
+                            indice_suivi = 2
+                    self.target = path_B[indice_suivi]
+            elif self.x > 641 and self.target_ball[0] < 641:
+                if self.y < 360:
+                    if (self.x < path_H[2][0] + 54 and self.x > path_H[1][0]+80):
+                        if (self.y < path_H[2][1] + 54):
+                            indice_suivi = 1
+                    if (self.x < path_H[1][0] + 54):
+                        if (self.y < path_H[1][1]+20):
+                            indice_suivi = 2
+                    self.target = path_H[len(path_H)-indice_suivi-1]
+                else:
+                    if (self.x < path_B[2][0] + 54 and self.x > path_B[1][0]+80):
+                        if (self.y < path_B[2][1] + 54):
+                            indice_suivi = 1
+                    if (self.x < path_B[1][0] + 54):
+                        if (self.y < path_B[1][1]+20):
+                            indice_suivi = 2
+                    self.target = path_B[len(path_B)-indice_suivi-1]
+            else:
+                self.change_zone = False
+
+        elif self.robot_state == Drone_State.Go_to_ball:
+            self.target = self.target_ball
+
+        elif self.robot_state == Drone_State.Go_to_safeZone:
+            if self.x < 640:
+                if self.safezones_positions_matrix[0, 0] < 640:
+                    self.target = [self.safezones_positions_matrix[0,
+                                                                   0] + 4, self.safezones_positions_matrix[0, 1] + 4]
+                else:
+                    self.target = [self.safezones_positions_matrix[1,
+                                                                   0] + 4, self.safezones_positions_matrix[1, 1] + 4]
+            else:
+                if self.safezones_positions_matrix[0, 0] > 640:
+                    self.target = [self.safezones_positions_matrix[0,
+                                                                   0] - 4, self.safezones_positions_matrix[0, 1] - 4]
+                else:
+                    self.target = [self.safezones_positions_matrix[1,
+                                                                   0] - 4, self.safezones_positions_matrix[1, 1] - 4]
 
 
 def main(args=None):
