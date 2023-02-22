@@ -4,7 +4,7 @@ from rclpy.node import Node
 import numpy as np
 import cv2
 
-from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray,Float64, Int64
+from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray, Float64, Int64
 from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import Image
 
@@ -103,10 +103,10 @@ class Guidage(Node):
         self.balles_pres = []
         self.safezones_positions_matrix = np.array([[0, 0], [0, 0]])
         self.couple = 0.
-        self.recule_it=0
-        self.ind_demar=0
-        self.block_it=0
-        self.state_save=Drone_State.start
+        self.recule_it = 0
+        self.ind_demar = 0
+        self.block_it = 0
+        self.state_save = Drone_State.start
 
         # Safe zone position subscriber
         self.subscription_safezones = self.create_subscription(
@@ -136,7 +136,7 @@ class Guidage(Node):
         # Save Safe zone position
         self.safezones_positions = np.array([])
         self.searching = True
-        self.blocked=False
+        self.blocked = False
         self.occur_in = 0
         self.occur_catch = 0
         self.image = np.zeros((240, 240, 3))
@@ -164,7 +164,7 @@ class Guidage(Node):
         roll, pitch, self.yaw = euler_from_quaternion(quat)
 
     def get_blocked_callback(self, msg):
-        self.blocked=msg.data
+        self.blocked = msg.data
 
     def sub_balls_callback(self, array_msg):
         global target_ball
@@ -235,7 +235,7 @@ class Guidage(Node):
                 self.searching = False
             else:
                 self.occur_catch += 1
-    
+
     def robot_safe_callback(self, msg):
         if msg.data and not self.searching and self.occur_in > 110:
             self.searching = True
@@ -262,7 +262,8 @@ class Guidage(Node):
             self.update_state()
 
         if self.target[0] is not None:
-            print("pos robot : ", self.x, self.y, "cible : ", self.target[0], self.target[1])
+            print("pos robot : ", self.x, self.y,
+                  "cible : ", self.target[0], self.target[1])
             pose_msg = Pose()
             pose_msg.position.x = float(self.target[0])
             pose_msg.position.y = float(self.target[1])
@@ -303,28 +304,26 @@ class Guidage(Node):
         cv2.imshow("Image", self.image)
         cv2.waitKey(1)
 
-
-
     def update_state(self):
         global indice_suivi
         # print(self.recule_it)
         # print(self.ind_demar)
         print(self.robot_state)
         if self.blocked:
-            self.state_save=self.robot_state
+            self.state_save = self.robot_state
             self.robot_state = Drone_State.Blocked
-        elif (self.robot_state == Drone_State.Blocked and self.block_it<75):
-            self.block_it+=1
-        elif (self.robot_state == Drone_State.Blocked and self.block_it>=75):
+        elif (self.robot_state == Drone_State.Blocked and self.block_it < 75):
+            self.block_it += 1
+        elif (self.robot_state == Drone_State.Blocked and self.block_it >= 75):
             self.robot_state = Drone_State.start
-            self.block_it=0
+            self.block_it = 0
 
-        elif self.robot_state == Drone_State.start and self.ind_demar>100:
+        elif self.robot_state == Drone_State.start and self.ind_demar > 100:
             self.robot_state = Drone_State.change_zone
             indice_suivi = 0
-            self.ind_demar=0
-        elif self.robot_state == Drone_State.start and self.ind_demar<=100:
-            self.ind_demar+=1
+            self.ind_demar = 0
+        elif self.robot_state == Drone_State.start and self.ind_demar <= 100:
+            self.ind_demar += 1
         elif (self.robot_state == Drone_State.change_zone and not self.change_zone):
             self.change_zone = True
             self.robot_state = Drone_State.Go_to_ball
@@ -332,22 +331,22 @@ class Guidage(Node):
             self.robot_state = Drone_State.Go_to_safeZone
         elif (self.robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
             self.robot_state = Drone_State.Go_out_safeZone
-        elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it<50):
-            self.recule_it+=1
-        elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it>=50):
+        elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it < 50):
+            self.recule_it += 1
+        elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it >= 50):
             self.robot_state = Drone_State.Go_to_ball
-            self.searching=True
-            self.recule_it=0
+            self.searching = True
+            self.recule_it = 0
         # elif (self.robot_state == Drone_State.Go_out_safeZone)
 
     def evitement(self):
-        msg=Int64()
-        msg.data=1
+        msg = Int64()
+        msg.data = 1
         self.fsm_publisher.publish(msg)
-        msg_arr=Float64MultiArray()
-        msg_arr.data=[5.0]
+        msg_arr = Float64MultiArray()
+        msg_arr.data = [5.0]
         self.pince_pub.publish(msg_arr)
-        if(self.target_ball[0] is None or self.x is None):
+        if (self.target_ball[0] is None or self.x is None):
             return 1
         if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
             self.change_zone = False
@@ -378,12 +377,12 @@ class Guidage(Node):
             self.evitement()
 
         elif self.robot_state == Drone_State.change_zone:
-            msg_arr=Float64MultiArray()
-            msg_arr.data=[0.0]
+            msg_arr = Float64MultiArray()
+            msg_arr.data = [0.0]
             self.pince_pub.publish(msg_arr)
 
-            msg=Int64()
-            msg.data=2
+            msg = Int64()
+            msg.data = 2
             self.fsm_publisher.publish(msg)
             global indice_suivi
             if self.x < 641 and self.target_ball[0] > 641:
@@ -425,24 +424,24 @@ class Guidage(Node):
 
         elif self.robot_state == Drone_State.Go_to_ball:
             if (self.x < 641 and self.target_ball[0] < 641) or (self.x > 641 and self.target_ball[0] > 641):
-                msg_arr=Float64MultiArray()
-                msg_arr.data=[0.0]
+                msg_arr = Float64MultiArray()
+                msg_arr.data = [0.0]
                 self.pince_pub.publish(msg_arr)
 
-                msg=Int64()
-                msg.data=3
+                msg = Int64()
+                msg.data = 3
                 self.fsm_publisher.publish(msg)
                 self.target = self.target_ball
             else:
                 self.robot_state = Drone_State.change_zone
 
         elif self.robot_state == Drone_State.Go_to_safeZone:
-            msg_arr=Float64MultiArray()
-            msg_arr.data=[0.0]
+            msg_arr = Float64MultiArray()
+            msg_arr.data = [0.0]
             self.pince_pub.publish(msg_arr)
 
-            msg=Int64()
-            msg.data=4
+            msg = Int64()
+            msg.data = 4
             self.fsm_publisher.publish(msg)
             if self.x < 640:
                 if self.safezones_positions_matrix[0, 0] < 640:
@@ -459,30 +458,28 @@ class Guidage(Node):
                     self.target = [self.safezones_positions_matrix[1,
                                                                    0] - 4, self.safezones_positions_matrix[1, 1] - 4]
         elif self.robot_state == Drone_State.Go_out_safeZone:
-            msg_arr=Float64MultiArray()
-            msg_arr.data=[0.0]
+            msg_arr = Float64MultiArray()
+            msg_arr.data = [0.0]
             self.pince_pub.publish(msg_arr)
 
-            msg=Int64()
-            msg.data=5
+            msg = Int64()
+            msg.data = 5
             self.fsm_publisher.publish(msg)
-            msg_arr=Float64MultiArray()
-            msg_arr.data=[5.0]
+            msg_arr = Float64MultiArray()
+            msg_arr.data = [5.0]
             self.pince_pub.publish(msg_arr)
 
         elif self.robot_state == Drone_State.Blocked:
-            msg_arr=Float64MultiArray()
-            msg_arr.data=[0.0]
+            msg_arr = Float64MultiArray()
+            msg_arr.data = [0.0]
             self.pince_pub.publish(msg_arr)
 
-            msg=Int64()
-            msg.data=6
+            msg = Int64()
+            msg.data = 6
             self.fsm_publisher.publish(msg)
-            msg_arr=Float64MultiArray()
-            msg_arr.data=[0.0]
+            msg_arr = Float64MultiArray()
+            msg_arr.data = [0.0]
             self.pince_pub.publish(msg_arr)
-
-
 
 
 def main(args=None):

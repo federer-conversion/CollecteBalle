@@ -29,7 +29,7 @@ def generate_launch_description():
         package='guidage_pkg',
         executable='guidage',
         name='guidage')
-    
+
     control_node = launch_ros.actions.Node(
         package='bot_control',
         executable='bot_control',

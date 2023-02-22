@@ -83,17 +83,18 @@ class ControlPublisher(Node):
     def __init__(self, fd_to_device):
         super().__init__('remote_controller_node')
         self.fd_to_device = fd_to_device
-        self.couple=0.
+        self.couple = 0.
         self.msg = Twist()
         self.publisher = self.create_publisher(Twist, '/demo/cmd_vel', 10)
-        self.pince_pub = self.create_publisher(Float64MultiArray, '/velocity_controller/commands', 10)
+        self.pince_pub = self.create_publisher(
+            Float64MultiArray, '/velocity_controller/commands', 10)
         self.publisher.publish(self.msg)
         self.acquisition_loop()
 
     def acquisition_loop(self):
         linear_speed_state = 0
         while True:
-            my_msg = Float64MultiArray() 
+            my_msg = Float64MultiArray()
             # controler input acquisition with a time_break (if no new command then break => avoid blocking function)
             r, w, e = select.select(
                 self.fd_to_device, [], [], 0.5/acquisition_frequency)
@@ -103,11 +104,11 @@ class ControlPublisher(Node):
                     # Check if the event is not an info like sync (if not its an input)
                     if event.type != ecodes.EV_SYN:
                         if int(event.code) == 304 and int(event.value) == 1:
-                            self.couple=5.
+                            self.couple = 5.
                         elif int(event.code) == 305 and int(event.value) == 1:
-                            self.couple=-5.
+                            self.couple = -5.
                         else:
-                            self.couple=0.0
+                            self.couple = 0.0
                         if int(event.code) == 311 and int(event.value) == 1:
                             self.msg.angular.z = -1*MAX_ANG_VEL
                             self.publisher.publish(self.msg)
@@ -145,7 +146,7 @@ class ControlPublisher(Node):
                             self.msg.linear.x = MAX_LIN_VEL
                             self.publisher.publish(self.msg)
 
-            my_msg.data=[self.couple]
+            my_msg.data = [self.couple]
             self.pince_pub.publish(my_msg)
 
     def timer_callback(self):
