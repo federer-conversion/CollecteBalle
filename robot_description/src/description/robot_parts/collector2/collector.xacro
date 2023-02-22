@@ -51,7 +51,7 @@
             <parent link="base_link" />
             <child link="segment_central" />
             <limit effort="1000000.0" lower="${(-4/20) * pi}" upper="${(-24/20) * pi}" velocity="30" />
-            <dynamics damping="0.0" friction="10.0"/>
+            <dynamics damping="0.0" friction="10.0" />
         </joint>
 
         <ros2_control name="GazeboSystem" type="system">
