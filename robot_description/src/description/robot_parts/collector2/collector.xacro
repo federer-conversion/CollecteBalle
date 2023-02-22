@@ -47,10 +47,10 @@
         <joint name="segment_central_joint" type="revolute">
             <axis xyz="0 1 0" />
             <!-- <origin xyz="0.25 -0.23 0" rpy="-1.5 0 ${-0.5 * pi}"/> -->
-            <origin xyz="0.1 -0.23 0" rpy="${0 * pi} ${(-1/20) * pi} ${0 * pi}" />
+            <origin xyz="0.1 -0.23 0" rpy="${0 * pi} ${(-16/20) * pi} ${0 * pi}" />
             <parent link="base_link" />
             <child link="segment_central" />
-            <limit effort="1000000.0" lower="${(1/20) * pi}" upper="${(1+1/20) * pi}" velocity="30" />
+            <limit effort="1000000.0" lower="${(-4/20) * pi}" upper="${(-24/20) * pi}" velocity="30" />
             <dynamics damping="0.0" friction="10.0"/>
         </joint>
 

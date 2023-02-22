@@ -29,10 +29,16 @@ def generate_launch_description():
         package='guidage_pkg',
         executable='guidage',
         name='guidage')
+    
+    control_node = launch_ros.actions.Node(
+        package='bot_control',
+        executable='bot_control',
+        name='bot_control')
 
     return launch.LaunchDescription([
         display_launch,
         tennis_court_launch,
         camera_node,
+        control_node,
         guidage_node
     ])
