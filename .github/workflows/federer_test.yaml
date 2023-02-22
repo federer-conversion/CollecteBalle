@@ -2,9 +2,9 @@ name: Federer_verification
 
 on:
   pull_request:
-    branches: [ main, devel ]
+    branches: [ main, functions_devel ]
   push:
-    branches: [ main, devel ]
+    branches: [ main, functions_devel ]
 
 jobs:
   build_ws:
