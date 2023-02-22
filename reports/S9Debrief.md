@@ -26,5 +26,8 @@ Pourcentage de tâches réalisées: 80%
 
 ### Sprint suivant : Besoin client
 
+* Ajouter une fonction pour decoincer le robot
+* Ajouter une fonction pour gerer les balles près du mur
+* Optimiser la stratégie de ramassage
+* Actualiser la position du robot sur le terrain
 
-	
