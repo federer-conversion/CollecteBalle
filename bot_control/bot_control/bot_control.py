@@ -15,7 +15,7 @@ class Drone_State(Enum):
     Go_to_safeZone = 4
     Go_out_safeZone = 5
 
-robot_state = Drone_State.start
+
 
 # Variable
 x_target, y_target = None, None
@@ -59,10 +59,6 @@ class controlSimple(Node):
             Pose, "target", self.target_callback, 10)
         self.subscription2
 
-        # self.subs_marche_arriere = self.create_subscription(
-        #     Float64, "marche_arriere", self.marche_arriere_callback, 10)
-        # self.subs_marche_arriere
-
         self.subs_marche_arriere = self.create_subscription(
             Int64, "fsm_state", self.fsm_state_callback, 10)
         self.subs_marche_arriere
@@ -75,9 +71,11 @@ class controlSimple(Node):
         self.get_logger().info(self.get_name() + " is launched")
 
         self.X_past = np.array([math.nan,math.nan])
+        self.u_lin_past = math.nan
+        self.robot_state = Drone_State.start
+
 
     def process(self):
-        global robot_state
 
         msg2 = Twist()
         
@@ -87,16 +85,24 @@ class controlSimple(Node):
         
 
         if yaw != None and x_target!=None:
+            ## Detection du blocage
+
+            vit = 0.
+            diff_vit_cmd_max = 10
+            if not math.isnan(self.X_past[0]):
+                timer_period = 0.1
+                vit = np.linalg.norm(X_robot - self.X_past)*timer_period
+
+                print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
+                if abs(self.u_lin_past-vit) > diff_vit_cmd_max:
+                    print("BLOCAGE")
+   
             ## Calculer de l'erreur
             X_target = np.array([x_target,y_target])
             X_robot = np.array([x,y])
             X_err = X_target-X_robot
 
-            vit = 0.
             
-            if not math.isnan(self.X_past[0]):
-                timer_period = 0.1
-                vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
             ## Calcul de la commande
             u_lin = 0.
@@ -117,10 +123,10 @@ class controlSimple(Node):
             # print("dist to goal = ", dist)
             if abs(err_theta) >= err_theta_start: #
                 print("Turn to aim", " err_theta = ", err_theta*180/np.pi)
-                print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
+                # print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
                 u_lin = 100*(-vit) # Essayer de tourner sur place
                 u = 2.6*err_theta
-                print("u_lin =", u_lin, " u =", u)
+                # print("u_lin =", u_lin, " u =", u)
 
             if dist <= dist_stop:
                 print("Goad Reached")
@@ -130,14 +136,14 @@ class controlSimple(Node):
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
-            if robot_state is Drone_State.Go_out_safeZone:
-                u_lin = -1000000.
+            if self.robot_state == Drone_State.Go_out_safeZone:
+                u_lin = -10.
                 u = 0.
                 print("marche_arriere")
     
             # Memoire
             self.X_past = X_robot
-
+            self.u_lin_past = u_lin
             # print(u,u_lin)
             msg2.linear.x = u_lin
             msg2.angular.z = u
@@ -157,8 +163,7 @@ class controlSimple(Node):
         y_target = msg.position.y
 
     def fsm_state_callback(self, msg):
-        global robot_state
-        robot_state = msg.data
+        self.robot_state = msg.data
 
 
 def main(args=None):
