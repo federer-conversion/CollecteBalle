@@ -112,7 +112,7 @@ class Guidage(Node):
         self.subscription_robot_pos
 
         # Create ball positions publisher
-        self.target_publisher = self.create_publisher(Pose, 'target2', 10)
+        self.target_publisher = self.create_publisher(Pose, 'target', 10)
     
     def robot_position_callback(self, msg):
         self.x = msg.pose.position.x
@@ -185,12 +185,13 @@ class Guidage(Node):
             array_msg.data).reshape((-1, 2))
 
     def publish_target(self):
-        if self.x is not None and self.target_ball[0] is not None:
+        if self.x is not None:
             print(self.robot_state)
             print(self.x, self.target_ball[0])
             self.action_state()
             self.update_state()
 
+        if self.target[0] is not None:
             pose_msg = Pose()
             pose_msg.position.x = float(self.target[0])
             pose_msg.position.y = float(self.target[1])
@@ -224,18 +225,13 @@ class Guidage(Node):
             global indice_suivi
             if self.x < 641 and self.target_ball[0] > 641:
                 if self.y < 360 : 
-                    if indice_suivi == 0:
-                        if(self.x < 531 - 54):
-                            if(self.y > 151 - 54): 
-                                indice_suivi = 1
-                    elif indice_suivi == 1:
-                        if(self.x < 641 - 54):
-                            if(self.y > 61-54):
-                                indice_suivi = 2
-                    if(self.x > 741-54):
-                        if(self.y < 151 - 54):
-                            self.change_zone = False
-                    return self.target(path_H[indice_suivi])
+                    if(self.x > 531 - 54):
+                        if(self.y < 151 + 54): 
+                            indice_suivi = 1
+                    if(self.x > 641 - 54):
+                        if(self.y < 61+20):
+                            indice_suivi = 2
+                    self.target = path_H[indice_suivi]
                 else:
                     print("suivre path_B (sens?)")
                     print(self.target_ball, path_B[0])
@@ -246,12 +242,11 @@ class Guidage(Node):
                 else:
                     print("suivre path_B (sens oppo)")
                     print(self.target_ball, path_B[-1])
+            else:
+                self.change_zone = False
         
         elif self.robot_state == Drone_State.Go_to_ball:
-            pose_msg = Pose()
-            pose_msg.position.x = float(self.target_ball[0])
-            pose_msg.position.y = float(self.target_ball[1])
-            self.target_publisher.publish(pose_msg)
+            self.target = self.target_ball
         
 
 
