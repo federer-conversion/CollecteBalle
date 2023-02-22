@@ -4,7 +4,7 @@ from rclpy.node import Node
 import numpy as np
 import cv2
 
-from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray
+from std_msgs.msg import UInt16MultiArray, Bool, Float64MultiArray,Float64
 from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import Image
 
@@ -142,6 +142,9 @@ class Guidage(Node):
             Float64MultiArray, '/velocity_controller/commands', 10)
         self.pince_pub
 
+        # Create target positions publisher
+        self.recule_publisher = self.create_publisher(Float64, 'marche_arriere', 10)
+
     def robot_position_callback(self, msg):
         self.x = msg.pose.position.x
         self.y = msg.pose.position.y
@@ -226,6 +229,7 @@ class Guidage(Node):
         elif msg.data and not self.searching and self.occur_in <= 70:
             self.occur_in += 1
         elif not msg.data:
+            self.in_safezone = False
             self.occur_in = 0
 
     def get_image_callback(self, img_msg):
@@ -247,7 +251,7 @@ class Guidage(Node):
             pose_msg = Pose()
             pose_msg.position.x = float(self.target[0])
             pose_msg.position.y = float(self.target[1])
-
+            self.target_publisher.publish(pose_msg)
         for balle in self.balles_pres:
             x, y = balle.get_pose()
             cv2.rectangle(self.image, (x-4, y-4),
@@ -257,24 +261,11 @@ class Guidage(Node):
         try:
             print(self.robot_state)
             if self.robot_state == Drone_State.Go_to_safeZone:
-                if self.x < 640:
-                    if self.safezones_positions_matrix[0, 0] < 640:
-                        x, y = float(self.safezones_positions_matrix[0, 0]), float(
-                            self.safezones_positions_matrix[0, 1])
-                    else:
-                        x, y = float(self.safezones_positions_matrix[1, 0]), float(
-                            self.safezones_positions_matrix[1, 1])
-                else:
-                    if self.safezones_positions_matrix[0, 0] > 640:
-                        x, y = float(self.safezones_positions_matrix[0, 0]), float(
-                            self.safezones_positions_matrix[0, 1])
-                    else:
-                        x, y = float(self.safezones_positions_matrix[1, 0]), float(
-                            self.safezones_positions_matrix[1, 1])
-                cv2.rectangle(self.image, (x-20, y-20),
-                              (x + 20, y + 20), (0, 0, 255), 2)
-                cv2.putText(self.image, "Target", (x-60, y+2),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                x, y = self.target
+                cv2.rectangle(self.image, (x-50, y-50),
+                              (x + 50, y + 50), (0, 0, 255), 2)
+                cv2.putText(self.image, "Target", (x+100, y+2),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
             else:
                 x, y = self.target
                 cv2.rectangle(self.image, (x-4, y-4),
@@ -307,6 +298,8 @@ class Guidage(Node):
             self.robot_state = Drone_State.Go_to_safeZone
         elif (self.robot_state == Drone_State.Go_to_safeZone and self.in_safezone):
             self.robot_state = Drone_State.Go_out_safeZone
+        elif (self.robot_state == Drone_State.Go_out_safeZone and not self.in_safezone):
+            self.robot_state = Drone_State.Go_to_ball
         # elif (self.robot_state == Drone_State.Go_out_safeZone)
 
     def action_state(self):
@@ -376,6 +369,16 @@ class Guidage(Node):
                 else:
                     self.target = [self.safezones_positions_matrix[1,
                                                                    0] - 4, self.safezones_positions_matrix[1, 1] - 4]
+        if self.robot_state == Drone_State.Go_out_safeZone:
+            msg=Float64()
+            msg.data=1.0
+            self.recule_publisher.publish(msg)
+        else:
+            msg=Float64()
+            msg.data=0.0
+            self.recule_publisher.publish(msg)
+
+
 
 
 def main(args=None):
