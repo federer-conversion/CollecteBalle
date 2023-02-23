@@ -8,6 +8,7 @@ from std_msgs.msg import Int64, Bool
 
 from enum import Enum
 
+
 class Drone_State(Enum):
     start = 1
     change_zone = 2
@@ -16,12 +17,12 @@ class Drone_State(Enum):
     Go_out_safeZone = 5
 
 
-
 # Variable
 x_target, y_target = None, None
 x, y, yaw = None, None, None
 
 marche_arriere = 0.0
+
 
 def euler_from_quaternion(quaternion):
     """
@@ -73,28 +74,27 @@ class controlSimple(Node):
         self.timer = self.create_timer(timer_period, self.process)
         self.get_logger().info(self.get_name() + " is launched")
 
-        self.X_past = np.array([math.nan,math.nan])
+        self.X_past = np.array([math.nan, math.nan])
         self.u_lin_past = math.nan
         self.robot_state = Drone_State.start
-        self.comtpeur_bloc=0
+        self.comtpeur_bloc = 0
         self.yaw_past = math.nan
 
         self.cnt_arriere = 0
 
-
     def process(self):
-        print("etat",self.robot_state)
+        print("etat", self.robot_state)
         msg2 = Twist()
         msg_blocked = Bool()
-        
+
         k_theta = 2.6
-        k_lin = 0.0025 
+        k_lin = 0.0025
         b_lin = 0.5
-        
-        if yaw != None and x_target!=None:
-            ## Detection du blocage
-            X_target = np.array([x_target,y_target])
-            X_robot = np.array([x,y])
+
+        if yaw != None and x_target != None:
+            # Detection du blocage
+            X_target = np.array([x_target, y_target])
+            X_robot = np.array([x, y])
 
             vit = 0.
             diff_vit_cmd_max = 2.75
@@ -103,11 +103,11 @@ class controlSimple(Node):
                 vit = np.linalg.norm(X_robot - self.X_past)*timer_period
 
                 print("vit = ", vit, " self.u_lin_past = ", self.u_lin_past)
-                if vit<0.11 and self.robot_state != 6:
-                    self.comtpeur_bloc+=1
+                if vit < 0.11 and self.robot_state != 6:
+                    self.comtpeur_bloc += 1
                 else:
-                    self.comtpeur_bloc=0
-                
+                    self.comtpeur_bloc = 0
+
                 if self.comtpeur_bloc > 40 and self.robot_state != 1:
                     msg_blocked.data = True
 
@@ -116,34 +116,33 @@ class controlSimple(Node):
                     # print("BLOCAGE")
                 else:
                     msg_blocked.data = False
-                
 
-            ## Calculer de l'erreur
+            # Calculer de l'erreur
             X_err = X_target-X_robot
 
-            
-            ## Calcul de la commande
+            # Calcul de la commande
             u_lin = 0.
             u = 0.
             err_theta_start = 10*np.pi/180
-            dist_stop=18
-            if self.robot_state==3:
+            dist_stop = 18
+            if self.robot_state == 3:
                 dist_stop = 1
             # err angulaire
+
             def sawtooth(x):
-                return (x+np.pi)%(2*np.pi)-np.pi
-            w = -1*np.arctan2(X_err[1],X_err[0])
+                return (x+np.pi) % (2*np.pi)-np.pi
+            w = -1*np.arctan2(X_err[1], X_err[0])
             err_theta = sawtooth(w - yaw)
-            
+
             # err linéaire
             dist = np.linalg.norm(X_err)
-    
+
             # commande
             # print("dist to goal = ", dist)
-            if abs(err_theta) >= err_theta_start: #
+            if abs(err_theta) >= err_theta_start:
                 print("Turn to aim", " err_theta = ", err_theta*180/np.pi)
                 # print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
-                u_lin = 2.6*(-vit) # Essayer de tourner sur place
+                u_lin = 2.6*(-vit)  # Essayer de tourner sur place
                 u = 2.6*err_theta
                 # print("u_lin =", u_lin, " u =", u)
             print(self.robot_state)
@@ -157,19 +156,18 @@ class controlSimple(Node):
                 u_lin = k_lin*dist + b_lin
                 u = k_theta*err_theta
 
-
-            if self.robot_state==5 or self.robot_state==6 : # Etat marche arriere
+            if self.robot_state == 5 or self.robot_state == 6:  # Etat marche arriere
                 # if self.cnt_arriere < 4:
                 u_lin = -2.
                 u = 0.
-                    # self.cnt_arriere += 1
+                # self.cnt_arriere += 1
                 # elif self.cnt_arriere >= 4:
                 #     u_lin = 2.
                 #     u = 0.
                 # if not math.isnan(self.yaw_past):
                 #     u = 2.5*sawtooth(self.yaw_past - yaw)
                 print("marche_arriere")
-            if self.robot_state==1: # Etat start
+            if self.robot_state == 1:  # Etat start
                 u_lin = 0.
                 u = 0.
                 print("IDLE")
@@ -207,6 +205,7 @@ def main(args=None):
     rclpy.spin(my_py_node)
     my_py_node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
