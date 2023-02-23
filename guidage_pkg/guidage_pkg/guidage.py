@@ -315,15 +315,21 @@ class Guidage(Node):
             self.robot_state = Drone_State.Blocked
         elif (self.robot_state == Drone_State.Blocked and self.block_it<75):
             self.block_it+=1
+            msg=Int64()
+            msg.data=5
+            self.fsm_publisher.publish(msg)
+            msg_arr=Float64MultiArray()
+            msg_arr.data=[5.0]
+            self.pince_pub.publish(msg_arr)
         elif (self.robot_state == Drone_State.Blocked and self.block_it>=75):
             self.robot_state = Drone_State.start
             self.block_it=0
 
-        elif self.robot_state == Drone_State.start and self.ind_demar>100:
+        elif self.robot_state == Drone_State.start and self.ind_demar>50:
             self.robot_state = Drone_State.change_zone
             indice_suivi = 0
             self.ind_demar=0
-        elif self.robot_state == Drone_State.start and self.ind_demar<=100:
+        elif self.robot_state == Drone_State.start and self.ind_demar<=50:
             self.ind_demar+=1
         elif (self.robot_state == Drone_State.change_zone and not self.change_zone):
             self.change_zone = True
@@ -335,7 +341,8 @@ class Guidage(Node):
         elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it<50):
             self.recule_it+=1
         elif (self.robot_state == Drone_State.Go_out_safeZone and self.recule_it>=50):
-            self.robot_state = Drone_State.Go_to_ball
+            # self.robot_state = Drone_State.Go_to_ball
+            self.robot_state = Drone_State.start
             self.searching=True
             self.recule_it=0
         # elif (self.robot_state == Drone_State.Go_out_safeZone)
@@ -345,7 +352,7 @@ class Guidage(Node):
         msg.data=1
         self.fsm_publisher.publish(msg)
         msg_arr=Float64MultiArray()
-        msg_arr.data=[5.0]
+        msg_arr.data=[0.0]
         self.pince_pub.publish(msg_arr)
         if(self.target_ball[0] is None or self.x is None):
             return 1
