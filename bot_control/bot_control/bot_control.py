@@ -88,7 +88,7 @@ class controlSimple(Node):
         msg_blocked = Bool()
 
         k_theta = 2.6
-        k_lin = 0.005
+        k_lin = 0.0025
         b_lin = 0.5
 
         if yaw != None and x_target != None:
@@ -108,7 +108,7 @@ class controlSimple(Node):
                 else:
                     self.comtpeur_bloc = 0
 
-                if self.comtpeur_bloc > 60 and self.robot_state != 1:
+                if self.comtpeur_bloc > 40 and self.robot_state != 1:
                     msg_blocked.data = True
 
                 elif (abs(self.u_lin_past-vit) > diff_vit_cmd_max and self.robot_state != 1):
@@ -142,7 +142,7 @@ class controlSimple(Node):
             if abs(err_theta) >= err_theta_start:
                 print("Turn to aim", " err_theta = ", err_theta*180/np.pi)
                 # print("vitesse lin = ", vit, " X_actu = ", X_robot, " X_past = ", self.X_past)
-                u_lin = 10*(-vit)  # Essayer de tourner sur place
+                u_lin = 2.6*(-vit)  # Essayer de tourner sur place
                 u = 2.6*err_theta
                 # print("u_lin =", u_lin, " u =", u)
             print(self.robot_state)
@@ -157,18 +157,18 @@ class controlSimple(Node):
                 u = k_theta*err_theta
 
             if self.robot_state == 5 or self.robot_state == 6:  # Etat marche arriere
-                if self.cnt_arriere < 4:
-                    u_lin = -2.
-                    u = 0.
-                    self.cnt_arriere += 1
-                elif self.cnt_arriere >= 4:
-                    u_lin = 2.
-                    u = 0.
-                if not math.isnan(self.yaw_past):
-                    u = 2.5*sawtooth(self.yaw_past - yaw)
+                # if self.cnt_arriere < 4:
+                u_lin = -2.
+                u = 0.
+                # self.cnt_arriere += 1
+                # elif self.cnt_arriere >= 4:
+                #     u_lin = 2.
+                #     u = 0.
+                # if not math.isnan(self.yaw_past):
+                #     u = 2.5*sawtooth(self.yaw_past - yaw)
                 print("marche_arriere")
             if self.robot_state == 1:  # Etat start
-                u_lin = -0.1 * self.u_lin_past
+                u_lin = 0.
                 u = 0.
                 print("IDLE")
 
